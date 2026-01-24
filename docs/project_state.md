@@ -84,7 +84,12 @@ Building **PolySci** - a web app that helps users understand political news thro
 
 ## Recent Sessions
 
-### 2026-01-23 (Latest - Contrarian Challenge Bug Fixes)
+### 2026-01-24 (Latest - UI Restructure)
+- Moved alignment scores from right panel header to left panel
+- Changed topics grid from 1-column to 2-column for compactness
+- Right panel is now chat-only
+
+### 2026-01-23 (Contrarian Challenge Bug Fixes)
 - Initialized git repo (was missing .git directory)
 - Fixed repetitive responses bug: stale React state was passing old conversation history to API
 - Gave chat UI more space: changed from 50/50 to 1/3-2/3 split

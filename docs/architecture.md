@@ -56,10 +56,9 @@ User provides stance
     ├─→ updateScores() → GPT-4o calculates 4 alignment scores (1-10)
     └─→ extractSources() → Parse citations
     ↓
-JSON response → Frontend (conversation interface)
-    ├─→ Alignment score box (top-right, 4 meters)
-    ├─→ Conversation area (messages with citations)
-    └─→ Input area (user stance + "I'm Done" button)
+JSON response → Frontend (2-panel layout)
+    ├─→ Left panel: Topic selector (2-col grid) + Alignment scores (4 meters)
+    └─→ Right panel: Conversation (messages + input + "I'm Done" button)
 ```
 
 ## Key Components
