@@ -105,8 +105,8 @@ export function ContrarianChallenge() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic: selectedTopic,
-          userStance: inputValue.trim(),
-          conversationHistory: conversation,
+          userStance: userMessage.content,
+          conversationHistory: [...conversation, userMessage],
           currentScores: alignmentScores,
         }),
       });
