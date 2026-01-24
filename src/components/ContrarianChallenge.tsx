@@ -145,7 +145,7 @@ export function ContrarianChallenge() {
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Left Panel - Topic Selector */}
-      <div className="w-1/2 border-r bg-white overflow-y-auto">
+      <div className="w-1/3 border-r bg-white overflow-y-auto">
         <div className="p-6">
           {selectedTopic ? (
             <div className="space-y-4">
@@ -203,7 +203,7 @@ export function ContrarianChallenge() {
       </div>
 
       {/* Right Panel - Conversation Area */}
-      <div className="w-1/2 bg-gray-50 flex flex-col">
+      <div className="w-2/3 bg-gray-50 flex flex-col">
         {/* Header with Score Box */}
         <div className="flex-shrink-0 p-4 border-b bg-white">
           <div className="flex items-start justify-between gap-4">
