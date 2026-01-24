@@ -157,44 +157,46 @@ export function ContrarianChallenge() {
                   onClick={handleChangeTopic}
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
-                  Change Topic
+                  Change
                 </button>
               </div>
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-gray-900 font-medium mb-2">{selectedTopic}</p>
-                <p className="text-sm text-gray-600">
-                  {getTopicDescription(selectedTopic as ContrarianTopic)}
-                </p>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900 font-medium text-sm">{selectedTopic}</p>
+              </div>
+
+              {/* Alignment Scores */}
+              <div className="mt-4">
+                <AlignmentScoreBox scores={alignmentScores} />
               </div>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+            <div className="text-center py-8">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
                 Select a Topic
               </h2>
-              <p className="text-gray-600">
-                Choose a topic to challenge your views with quantitative evidence
+              <p className="text-sm text-gray-600">
+                Challenge your views with data
               </p>
             </div>
           )}
 
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {selectedTopic ? 'Other Topics' : 'Available Topics'}
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">
+              {selectedTopic ? 'Other Topics' : 'Topics'}
             </h3>
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {CONTRARIAN_TOPICS.map((topic) => (
                 <button
                   key={topic}
                   onClick={() => handleTopicSelect(topic)}
                   disabled={isLoading}
-                  className={`w-full text-left p-3 rounded-lg border transition-all ${
+                  className={`text-left p-2 rounded border transition-all text-xs ${
                     selectedTopic === topic
                       ? 'bg-blue-50 border-blue-400 text-blue-900'
                       : 'bg-gray-50 border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-900'
                   } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <p className="text-sm font-medium">{topic}</p>
+                  {topic}
                 </button>
               ))}
             </div>
@@ -204,18 +206,11 @@ export function ContrarianChallenge() {
 
       {/* Right Panel - Conversation Area */}
       <div className="w-2/3 bg-gray-50 flex flex-col">
-        {/* Header with Score Box */}
-        <div className="flex-shrink-0 p-4 border-b bg-white">
-          <div className="flex items-start justify-between gap-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Conversation
-            </h3>
-            {selectedTopic && (
-              <div className="w-56 flex-shrink-0">
-                <AlignmentScoreBox scores={alignmentScores} />
-              </div>
-            )}
-          </div>
+        {/* Header */}
+        <div className="flex-shrink-0 px-4 py-3 border-b bg-white">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Conversation
+          </h3>
         </div>
 
         {/* Scrollable Conversation Area */}
