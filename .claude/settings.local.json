@@ -1,0 +1,11 @@
+{
+  "enabledMcpjsonServers": [
+    "github",
+    "firebase-mcp-server",
+    "magicuidesign",
+    "vercel",
+    "firecrawl-mcp",
+    "memory",
+    "sequential-thinking"
+  ]
+}
