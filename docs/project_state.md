@@ -84,7 +84,14 @@ Building **PolySci** - a web app that helps users understand political news thro
 
 ## Recent Sessions
 
-### 2026-01-23 (Latest - Contrarian Challenge UI Fixes)
+### 2026-01-23 (Latest - Contrarian Challenge Bug Fixes)
+- Initialized git repo (was missing .git directory)
+- Fixed repetitive responses bug: stale React state was passing old conversation history to API
+- Gave chat UI more space: changed from 50/50 to 1/3-2/3 split
+- Investigated repeated sources: confirmed expected behavior (government data sources are fixed agencies)
+- Audited alignment scoring: verified GPT-4o semantic analysis + 60/40 weighting works correctly
+
+### 2026-01-23 (Earlier - Contrarian Challenge UI Fixes)
 - Fixed Contrarian Challenge UI issues:
   - Input text was blending with background (added explicit text colors)
   - Score box was covering conversation (moved to inline header)
@@ -282,11 +289,11 @@ Building **PolySci** - a web app that helps users understand political news thro
     - [x] Verify FRED data for economic topics
     - [x] Verify topic-specific spending searches
     - [x] Test caching (same topic should use cache)
-- [ ] **Contrarian Challenge Issues (Priority)**
-  - [ ] Fix contrarian agent repetitive responses (keeps saying same thing)
-  - [ ] Audit alignment score tracking (verify scores update meaningfully)
-  - [ ] Give chat UI more space
-  - [ ] Investigate repeated sources (may be using only cached data)
+- [x] **Contrarian Challenge Issues (Priority)** ✅
+  - [x] Fix contrarian agent repetitive responses - was stale React state bug (now passes [...conversation, userMessage])
+  - [x] Audit alignment score tracking - verified: GPT-4o semantic analysis + 60/40 weighting works correctly
+  - [x] Give chat UI more space - changed to 1/3-2/3 split (was 50/50)
+  - [x] Investigate repeated sources - expected behavior: government sources ARE from fixed agencies (BLS, Census, etc.)
 - [ ] Add error boundaries for better error handling in UI
 - [ ] Consider adding retry logic for failed API calls
 - [ ] Update follow-up endpoint to use non-streaming (currently still uses SSE)
