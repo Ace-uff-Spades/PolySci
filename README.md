@@ -17,6 +17,30 @@ PolySci was built to combat misinformation and echo chambers in political discou
 
 The goal is **educational discourse** — helping you become a more informed citizen, not winning arguments.
 
+---
+
+## Getting Started 🚀
+
+```bash
+npm install
+cp .env.example .env.local   # OPENAI_API_KEY required; add Newsdata.io, Firebase, gov API keys as needed
+
+npm run dev                  # Run the app
+npm test                     # Unit tests
+npm run eval                 # AI evals (optional: npm run eval -- educational | contrarian)
+```
+
+**Docs** 📖
+
+| Doc | What's inside |
+|-----|----------------|
+| Architecture & flows | `docs/architecture.md` |
+| Case study (purpose, UX, tradeoffs, evals) | `docs/case-study-summary.md` |
+| Project status & open work | `docs/project_state.md` |
+| Context management (contributors) | `docs/context-management.md` |
+
+---
+
 ## Features ✨
 
 ### Analysis 📰
@@ -125,27 +149,7 @@ Pick a topic and see how **four ideological lenses** interpret the same issue:
 | EIA (optional) | Energy data |
 | FRED (optional) | Economic indicators |
 
----
 
-## Getting Started 🚀
-
-```bash
-npm install
-cp .env.example .env.local   # OPENAI_API_KEY required; add Newsdata.io, Firebase, gov API keys as needed
-
-npm run dev                  # Run the app
-npm test                     # Unit tests
-npm run eval                 # AI evals (optional: npm run eval -- educational | contrarian)
-```
-
-**Docs** 📖
-
-| Doc | What's inside |
-|-----|----------------|
-| Architecture & flows | `docs/architecture.md` |
-| Case study (purpose, UX, tradeoffs, evals) | `docs/case-study-summary.md` |
-| Project status & open work | `docs/project_state.md` |
-| Context management (contributors) | `docs/context-management.md` |
 
 ---
 
