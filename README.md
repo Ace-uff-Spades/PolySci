@@ -34,23 +34,24 @@ Select from predefined political topics and see how four different ideological l
 
 Each perspective is backed by the same government data, showing how ideology shapes interpretation.
 
-### Contrarian Challenge Tab
-Test and strengthen your political views:
-1. Select a topic and share your stance
-2. An AI contrarian challenges you with statistics from an opposing perspective
-3. Track your alignment scores across all four political lenses in real-time
-4. Refine your arguments or update your views based on the data
+### The Contrarian Tab
+Test and strengthen your political views with data-driven challenge:
+1. **Select a topic** (15 topics) — you get an initial question and neutral alignment scores (4 lenses: liberalism, conservatism, socialism, libertarianism).
+2. **Educational path:** Say "I don't know," ask a question, or share thoughts — you get analysis (common stances, values at stake) and a follow-up question. No statistics until you commit a stance.
+3. **Stance path:** Type your stance, then click **"I have a stance — challenge me"** (or confirm when asked "Is X your stance?"). The Contrarian runs a two-stage pipeline: acknowledge your stance merits, then challenge with one statistic for and one against (topic-specific, from government data only).
+4. **In contrarian mode:** Replies stay contrarian until you click **"I'm Done"** or ask a question (then one educational answer). Use **"Change my stance"** to submit a new stance and get a fresh challenge.
+5. **Alignment scores** update in real time (1–10 per lens); sources are cited with clickable links. CTAs ("Learn more," "Take action") appear on challenge responses when sources exist.
 
 ## Current Status
 
 ### Completed
-- Full-stack Next.js application with TypeScript
-- Integration with 6 government data APIs (BLS, USASpending, Census, Congress.gov, EIA, FRED)
-- News integration via Newsdata.io with Firebase caching
-- GPT-4o powered analysis with source citations
-- All three feature tabs fully functional
-- Alignment scoring system with weighted updates
-- Comprehensive test coverage (TDD methodology)
+- Full-stack Next.js 14 app with TypeScript and Tailwind CSS
+- Integration with 6 government data APIs (BLS, USASpending, Census, Congress.gov, EIA, FRED) and topic-aware data mapping
+- News integration via Newsdata.io with Firebase caching (24h news, 6h gov data TTL)
+- GPT-4o for analysis, Socratic perspectives, and Contrarian; gpt-4o-mini for classification (stance, question type, topic relevance)
+- All three feature tabs: Analysis (news + gov data → structured analysis), Socratic Circle (4 perspectives in parallel), The Contrarian (educational/contrarian modes, two-stage pipeline, JSON output)
+- Alignment scoring (4 lenses, 60/40 weighting), hybrid topic validation, explicit stance flow and "Change my stance"
+- Unit tests (Vitest, TDD) and AI evals (Braintrust + custom LLM scorers: faithfulness, relevancy, alignment)
 
 ### Future Enhancements
 - User authentication (save conversation history, preferences)
@@ -66,7 +67,7 @@ Test and strengthen your political views:
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Frontend (Next.js)                       │
 │  ┌───────────┐  ┌─────────────────┐  ┌─────────────────────┐   │
-│  │  Analysis │  │ Socratic Circle │  │ Contrarian Challenge│   │
+│  │  Analysis │  │ Socratic Circle │  │ The Contrarian │   │
 │  └─────┬─────┘  └────────┬────────┘  └──────────┬──────────┘   │
 └────────┼─────────────────┼──────────────────────┼───────────────┘
          │                 │                      │
@@ -96,9 +97,9 @@ Test and strengthen your political views:
 ### Tech Stack
 - **Frontend**: Next.js 14, React, Tailwind CSS
 - **Backend**: Next.js API Routes
-- **Database**: Firebase Firestore (caching)
-- **LLM**: OpenAI GPT-4o
-- **Testing**: Vitest
+- **Cache**: Firebase Firestore (news 24h, gov data 6h TTL)
+- **LLM**: OpenAI GPT-4o (analysis, Socratic, Contrarian, evals); gpt-4o-mini (classification)
+- **Testing**: Vitest (unit), Braintrust + custom LLM scorers (AI evals)
 
 ### Data Sources
 | Source | Data Provided |
@@ -117,16 +118,28 @@ Test and strengthen your political views:
 # Install dependencies
 npm install
 
-# Set up environment variables (copy .env.example to .env.local)
+# Set up environment variables
 cp .env.example .env.local
-# Edit .env.local with your API keys
+# Edit .env.local: OPENAI_API_KEY required; Newsdata.io, Firebase, gov API keys as needed
 
 # Run development server
 npm run dev
 
-# Run tests
+# Run unit tests
 npm test
+
+# Run AI evals (requires OPENAI_API_KEY; optional EVAL_LIMIT=N, dataset: all | contrarian | educational)
+npm run eval
+npm run eval -- educational
+npm run eval -- contrarian
 ```
+
+## Docs
+
+- **Architecture & flows:** `docs/architecture.md`
+- **Case study (purpose, UX, tradeoffs, evals):** `docs/case-study-summary.md`
+- **Project status & open work:** `docs/project_state.md`
+- **Context management (for contributors):** `docs/context-management.md`
 
 ## License
 

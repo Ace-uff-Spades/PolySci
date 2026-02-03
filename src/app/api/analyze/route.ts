@@ -1,36 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { gatherContext, generateAnalysis, generateFollowUpSuggestions } from '@/lib/analysis';
+import { jsonError, requireTopic } from '../utils';
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic } = await request.json();
-
-    if (!topic || typeof topic !== 'string') {
-      return NextResponse.json(
-        { error: 'Topic is required' },
-        { status: 400 }
-      );
-    }
-
-    // Gather context from all data sources
+    const body = await request.json();
+    const topic = requireTopic(body);
+    if (topic instanceof NextResponse) return topic;
     const context = await gatherContext(topic);
-
-    // Generate analysis (non-streaming)
     const analysis = await generateAnalysis(context);
-
-    // Generate contextual follow-up suggestions based on analysis
     const suggestions = await generateFollowUpSuggestions(analysis);
-
-    return NextResponse.json({
-      analysis,
-      suggestions,
-      context, // Return context for follow-up questions
-    });
+    return NextResponse.json({ analysis, suggestions, context });
   } catch (error) {
     console.error('Analysis error:', error);
-    return NextResponse.json(
-      { error: 'Analysis failed' },
-      { status: 500 }
-    );
+    return jsonError('Analysis failed', 500);
   }
 }

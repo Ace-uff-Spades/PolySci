@@ -41,8 +41,8 @@ describe('fetchNews', () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
+      text: () => Promise.resolve('Unauthorized'),
     });
-
     await expect(fetchNews('test')).rejects.toThrow('Newsdata API error: 401');
   });
 });

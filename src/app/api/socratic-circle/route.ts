@@ -1,37 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAllPerspectives } from '@/lib/socratic';
 import { isValidTopic } from '@/lib/socratic/topics';
+import { jsonError, requireTopic, invalidTopicResponse } from '../utils';
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic } = await request.json();
-
-    if (!topic || typeof topic !== 'string') {
-      return NextResponse.json(
-        { error: 'Topic is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!isValidTopic(topic)) {
-      return NextResponse.json(
-        { error: 'Invalid topic. Topic must be from the predefined list.' },
-        { status: 400 }
-      );
-    }
-
-    // Generate all 4 perspectives in parallel
+    const body = await request.json();
+    const topic = requireTopic(body);
+    if (topic instanceof NextResponse) return topic;
+    if (!isValidTopic(topic)) return invalidTopicResponse();
     const perspectives = await generateAllPerspectives(topic);
-
-    return NextResponse.json({
-      perspectives,
-      topic,
-    });
+    return NextResponse.json({ perspectives, topic });
   } catch (error) {
     console.error('Socratic Circle error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate perspectives' },
-      { status: 500 }
-    );
+    return jsonError('Failed to generate perspectives', 500);
   }
 }

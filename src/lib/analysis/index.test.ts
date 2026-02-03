@@ -18,13 +18,15 @@ vi.mock('../government', () => ({
   gatherGovernmentData: vi.fn(),
 }));
 
+const mockCreate = vi.fn();
 vi.mock('../openai', () => ({
-  streamCompletion: vi.fn(),
+  getOpenAIClient: vi.fn(() => ({
+    chat: { completions: { create: mockCreate } },
+  })),
 }));
 
 import { getNewsForQuery } from '../news-service';
 import { gatherGovernmentData } from '../government';
-import { streamCompletion } from '../openai';
 
 describe('analysis service', () => {
   beforeEach(() => {
@@ -70,69 +72,42 @@ describe('analysis service', () => {
       const context: AnalysisContext = {
         topic: 'test topic',
         newsArticles: [],
-        governmentData: {
-          economic: {},
-          spending: {},
-          demographic: {},
-          legislative: {},
-        },
+        governmentData: { economic: {}, spending: {}, demographic: {}, legislative: {} },
         analysisHistory: [],
       };
-
       const chunks = ['Hello', ' ', 'World'];
-      let chunkIndex = 0;
-
-      vi.mocked(streamCompletion).mockImplementation(async (_, __, onChunk) => {
-        // Simulate streaming chunks
-        for (const chunk of chunks) {
-          onChunk(chunk);
-        }
+      mockCreate.mockResolvedValue({
+        [Symbol.asyncIterator]() {
+          let i = 0;
+          return {
+            async next() {
+              if (i < chunks.length) return { value: { choices: [{ delta: { content: chunks[i++] } }] }, done: false };
+              return { value: undefined, done: true };
+            },
+          };
+        },
       });
-
       const results: string[] = [];
-      for await (const chunk of streamAnalysis(context)) {
-        results.push(chunk);
-      }
-
+      for await (const chunk of streamAnalysis(context)) results.push(chunk);
       expect(results).toEqual(chunks);
       expect(context.analysisHistory).toHaveLength(1);
       expect(context.analysisHistory[0]).toBe('Hello World');
-      expect(streamCompletion).toHaveBeenCalledOnce();
+      expect(mockCreate).toHaveBeenCalledOnce();
     });
 
     it('should call streamCompletion with correct prompts', async () => {
       const context: AnalysisContext = {
         topic: 'test topic',
-        newsArticles: [
-          {
-            article_id: '1',
-            title: 'Test',
-            link: 'https://example.com',
-            description: 'Test',
-            pubDate: '2026-01-21',
-            source_id: 'test',
-          },
-        ],
-        governmentData: {
-          economic: {},
-          spending: {},
-          demographic: {},
-          legislative: {},
-        },
+        newsArticles: [{ article_id: '1', title: 'Test', link: 'https://example.com', description: 'Test', pubDate: '2026-01-21', source_id: 'test' }],
+        governmentData: { economic: {}, spending: {}, demographic: {}, legislative: {} },
         analysisHistory: [],
       };
-
-      vi.mocked(streamCompletion).mockImplementation(async () => {});
-
-      // Consume the generator
-      for await (const _ of streamAnalysis(context)) {
-        // Just consume
-      }
-
-      expect(streamCompletion).toHaveBeenCalledOnce();
-      const [systemPrompt, userPrompt] = vi.mocked(streamCompletion).mock.calls[0];
-      expect(systemPrompt).toContain('balanced, objective political news analyst');
-      expect(userPrompt).toContain('test topic');
+      mockCreate.mockResolvedValue({ [Symbol.asyncIterator]: () => ({ async next() { return { value: undefined, done: true }; } }) });
+      for await (const _ of streamAnalysis(context)) {}
+      expect(mockCreate).toHaveBeenCalledOnce();
+      const [opts] = mockCreate.mock.calls[0];
+      expect(opts.messages[0].content).toContain('balanced');
+      expect(opts.messages[1].content).toContain('test topic');
     });
   });
 
@@ -141,93 +116,54 @@ describe('analysis service', () => {
       const context: AnalysisContext = {
         topic: 'test topic',
         newsArticles: [],
-        governmentData: {
-          economic: {},
-          spending: {},
-          demographic: {},
-          legislative: {},
-        },
+        governmentData: { economic: {}, spending: {}, demographic: {}, legislative: {} },
         analysisHistory: ['Previous analysis'],
       };
-
       const chunks = ['Follow', ' ', 'up'];
-      vi.mocked(streamCompletion).mockImplementation(async (_, __, onChunk) => {
-        for (const chunk of chunks) {
-          onChunk(chunk);
-        }
+      mockCreate.mockResolvedValue({
+        [Symbol.asyncIterator]() {
+          let i = 0;
+          return { async next() { if (i < chunks.length) return { value: { choices: [{ delta: { content: chunks[i++] } }] }, done: false }; return { value: undefined, done: true }; } };
+        },
       });
-
       const results: string[] = [];
-      for await (const chunk of streamFollowUp(context, 'What happens next?')) {
-        results.push(chunk);
-      }
-
+      for await (const chunk of streamFollowUp(context, 'What happens next?')) results.push(chunk);
       expect(results).toEqual(chunks);
       expect(context.analysisHistory).toHaveLength(2);
       expect(context.analysisHistory[1]).toBe('Follow up');
-      expect(streamCompletion).toHaveBeenCalledOnce();
+      expect(mockCreate).toHaveBeenCalledOnce();
     });
 
     it('should use empty string if no previous analysis', async () => {
       const context: AnalysisContext = {
         topic: 'test topic',
         newsArticles: [],
-        governmentData: {
-          economic: {},
-          spending: {},
-          demographic: {},
-          legislative: {},
-        },
+        governmentData: { economic: {}, spending: {}, demographic: {}, legislative: {} },
         analysisHistory: [],
       };
-
-      vi.mocked(streamCompletion).mockImplementation(async () => {});
-
-      for await (const _ of streamFollowUp(context, 'Question?')) {
-        // Consume
-      }
-
-      expect(streamCompletion).toHaveBeenCalledOnce();
-      const [, userPrompt] = vi.mocked(streamCompletion).mock.calls[0];
-      expect(userPrompt).toContain('Question?');
+      mockCreate.mockResolvedValue({ [Symbol.asyncIterator]: () => ({ async next() { return { value: undefined, done: true }; } }) });
+      for await (const _ of streamFollowUp(context, 'Question?')) {}
+      expect(mockCreate).toHaveBeenCalledOnce();
+      expect(mockCreate.mock.calls[0][0].messages[1].content).toContain('Question?');
     });
   });
 
   describe('generateFollowUpSuggestions', () => {
     it('should generate contextual follow-up suggestions', async () => {
-      const analysis = `## Quick Summary
-This is about the federal budget.
-
-## Democratic Perspective
-Democrats support increased spending.
-
-## Republican Perspective
-Republicans want to cut spending.`;
-
-      const suggestions = await generateFollowUpSuggestions(analysis);
-
+      mockCreate.mockResolvedValue({
+        choices: [{ message: { content: 'Q1?\nQ2?\nQ3?\nQ4?\nQ5?' } }],
+      });
+      const suggestions = await generateFollowUpSuggestions('Test analysis');
       expect(suggestions).toHaveLength(5);
       expect(Array.isArray(suggestions)).toBe(true);
-      suggestions.forEach((suggestion) => {
-        expect(typeof suggestion).toBe('string');
-        expect(suggestion.length).toBeGreaterThan(0);
-      });
+      suggestions.forEach((s) => { expect(typeof s).toBe('string'); expect(s.length).toBeGreaterThan(0); });
     });
 
     it('should return default suggestions on error', async () => {
-      // Mock OpenAI to throw error
-      const originalClient = require('../openai').getOpenAIClient;
-      vi.spyOn(require('../openai'), 'getOpenAIClient').mockImplementation(() => {
-        throw new Error('API error');
-      });
-
-      const analysis = 'Test analysis';
-      const suggestions = await generateFollowUpSuggestions(analysis);
-
+      mockCreate.mockRejectedValue(new Error('API error'));
+      const suggestions = await generateFollowUpSuggestions('Test analysis');
       expect(suggestions).toHaveLength(5);
       expect(Array.isArray(suggestions)).toBe(true);
-
-      vi.restoreAllMocks();
     });
   });
 });

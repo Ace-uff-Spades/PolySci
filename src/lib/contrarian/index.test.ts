@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
-  generateContrarianChallenge,
+  generateContrarian,
 } from './index';
-import { ContrarianContext, AlignmentScores, ContrarianChallengeResponse } from './index';
+import { ContrarianContext, AlignmentScores, ContrarianOutput } from './index';
 import { GovernmentData } from '../government';
 
 // Mock dependencies
@@ -10,8 +10,19 @@ vi.mock('../government', () => ({
   gatherGovernmentData: vi.fn(),
 }));
 
+const mockGetJSONCompletion = vi.fn();
+const mockGetOpenAIClient = vi.fn();
 vi.mock('../openai', () => ({
-  getOpenAIClient: vi.fn(),
+  getOpenAIClient: (...args: unknown[]) => mockGetOpenAIClient(...args),
+  getJSONCompletion: (...args: unknown[]) => mockGetJSONCompletion(...args),
+}));
+
+vi.mock('./stance-analysis', () => ({
+  analyzeStance: vi.fn().mockResolvedValue({
+    acknowledgment: 'Your stance has merit.',
+    supportingStatistics: [{ text: 'Stat [1]', citation: 1 }],
+    validPoints: ['Valid point'],
+  }),
 }));
 
 vi.mock('./prompts', () => ({
@@ -23,17 +34,10 @@ vi.mock('./scoring', () => ({
   updateScores: vi.fn(),
 }));
 
-vi.mock('../analysis/sources', () => ({
-  extractSources: vi.fn(),
-}));
-
-import { gatherGovernmentData } from '../government';
-import { getOpenAIClient } from '../openai';
 import { buildContrarianSystemPrompt, buildContrarianUserPrompt } from './prompts';
 import { updateScores } from './scoring';
-import { extractSources } from '../analysis/sources';
 
-describe('generateContrarianChallenge', () => {
+describe('generateContrarian', () => {
   const mockGovernmentData: GovernmentData = {
     economic: {
       unemployment: [{ 
@@ -66,133 +70,82 @@ describe('generateContrarianChallenge', () => {
   });
 
   it('should generate challenge with updated scores', async () => {
-    const mockClient = {
-      chat: {
-        completions: {
-          create: vi.fn().mockResolvedValue({
-            choices: [{
-              message: {
-                content: 'I understand your support for universal healthcare. However, consider that the U.S. spends $4.3 trillion annually [1].\n\n## Sources\n1. [BLS](https://www.bls.gov/)',
-              },
-            }],
-          }),
-        },
-      },
-    };
-    (getOpenAIClient as any).mockReturnValue(mockClient);
+    mockGetJSONCompletion.mockResolvedValue({
+      acknowledgment: 'I understand your support for universal healthcare.',
+      statisticsFor: [{ text: 'Stat [1]', citation: 1 }],
+      statisticsAgainst: [{ text: 'However, consider $4.3 trillion [1].', citation: 1 }],
+      deeperAnalysis: 'Analysis.',
+      followUpQuestion: 'What do you think?',
+      sources: [{ number: 1, name: 'BLS', url: 'https://www.bls.gov/' }],
+    });
     (buildContrarianSystemPrompt as any).mockReturnValue('System prompt');
     (buildContrarianUserPrompt as any).mockReturnValue('User prompt');
-    (updateScores as any).mockResolvedValue({
-      liberalism: 8,
-      conservatism: 2,
-      socialism: 7,
-      libertarianism: 3,
-    });
-    (extractSources as any).mockReturnValue([
-      { number: 1, name: 'BLS', url: 'https://www.bls.gov/' },
-    ]);
+    (updateScores as any).mockResolvedValue({ liberalism: 8, conservatism: 2, socialism: 7, libertarianism: 3 });
 
-    const result = await generateContrarianChallenge(mockContext, 'I support universal healthcare');
+    const result = await generateContrarian(mockContext, 'I support universal healthcare');
 
-    expect(result.challenge).toContain('I understand');
+    expect(result.type).toBe('challenge');
+    expect(result.sections.acknowledgment).toContain('I understand');
     expect(result.updatedScores.liberalism).toBe(8);
-    expect(result.followUpQuestion).toBeDefined();
+    expect(result.sections.followUpQuestion).toBeDefined();
   });
 
   it('should call OpenAI with correct prompts', async () => {
-    const mockClient = {
-      chat: {
-        completions: {
-          create: vi.fn().mockResolvedValue({
-            choices: [{
-              message: {
-                content: 'Challenge text\n\n## Sources\n1. [Source](url)',
-              },
-            }],
-          }),
-        },
-      },
-    };
-    (getOpenAIClient as any).mockReturnValue(mockClient);
+    mockGetJSONCompletion.mockResolvedValue({
+      acknowledgment: 'Ack.',
+      statisticsFor: [],
+      statisticsAgainst: [],
+      deeperAnalysis: 'Analysis.',
+      followUpQuestion: 'Follow-up?',
+      sources: [],
+    });
     (buildContrarianSystemPrompt as any).mockReturnValue('System prompt');
     (buildContrarianUserPrompt as any).mockReturnValue('User prompt');
     (updateScores as any).mockResolvedValue(mockContext.alignmentScores);
-    (extractSources as any).mockReturnValue([]);
 
-    await generateContrarianChallenge(mockContext, 'I support universal healthcare');
+    await generateContrarian(mockContext, 'I support universal healthcare');
 
     expect(buildContrarianSystemPrompt).toHaveBeenCalled();
-    expect(buildContrarianUserPrompt).toHaveBeenCalledWith(
-      'Healthcare System',
-      'I support universal healthcare',
-      mockGovernmentData,
-      []
-    );
-    expect(mockClient.chat.completions.create).toHaveBeenCalled();
+    expect(buildContrarianUserPrompt).toHaveBeenCalledWith('Healthcare System', 'I support universal healthcare', mockGovernmentData, [], expect.any(Object), undefined);
+    expect(mockGetJSONCompletion).toHaveBeenCalled();
   });
 
   it('should extract sources from response', async () => {
-    const mockClient = {
-      chat: {
-        completions: {
-          create: vi.fn().mockResolvedValue({
-            choices: [{
-              message: {
-                content: 'Challenge text\n\n## Sources\n1. [BLS](https://www.bls.gov/)',
-              },
-            }],
-          }),
-        },
-      },
-    };
-    (getOpenAIClient as any).mockReturnValue(mockClient);
+    mockGetJSONCompletion.mockResolvedValue({
+      acknowledgment: 'Ack.',
+      statisticsFor: [{ text: '[1]', citation: 1 }],
+      statisticsAgainst: [],
+      deeperAnalysis: 'Analysis.',
+      followUpQuestion: '?',
+      sources: [{ number: 1, name: 'BLS', url: 'https://www.bls.gov/' }],
+    });
     (buildContrarianSystemPrompt as any).mockReturnValue('System prompt');
     (buildContrarianUserPrompt as any).mockReturnValue('User prompt');
     (updateScores as any).mockResolvedValue(mockContext.alignmentScores);
-    (extractSources as any).mockReturnValue([
-      { number: 1, name: 'BLS', url: 'https://www.bls.gov/' },
-    ]);
 
-    const result = await generateContrarianChallenge(mockContext, 'I support universal healthcare');
+    const result = await generateContrarian(mockContext, 'I support universal healthcare');
 
-    expect(extractSources).toHaveBeenCalled();
     expect(result.sources).toHaveLength(1);
-    expect(result.sources?.[0].name).toBe('BLS');
+    expect(result.sources[0].name).toBe('BLS');
   });
 
   it('should update scores based on user stance', async () => {
-    const mockClient = {
-      chat: {
-        completions: {
-          create: vi.fn().mockResolvedValue({
-            choices: [{
-              message: {
-                content: 'Challenge text\n\n## Sources',
-              },
-            }],
-          }),
-        },
-      },
-    };
-    (getOpenAIClient as any).mockReturnValue(mockClient);
+    mockGetJSONCompletion.mockResolvedValue({
+      acknowledgment: 'Ack.',
+      statisticsFor: [],
+      statisticsAgainst: [],
+      deeperAnalysis: 'Analysis.',
+      followUpQuestion: '?',
+      sources: [],
+    });
     (buildContrarianSystemPrompt as any).mockReturnValue('System prompt');
     (buildContrarianUserPrompt as any).mockReturnValue('User prompt');
-    const updatedScores: AlignmentScores = {
-      liberalism: 8,
-      conservatism: 2,
-      socialism: 7,
-      libertarianism: 3,
-    };
+    const updatedScores: AlignmentScores = { liberalism: 8, conservatism: 2, socialism: 7, libertarianism: 3 };
     (updateScores as any).mockResolvedValue(updatedScores);
-    (extractSources as any).mockReturnValue([]);
 
-    const result = await generateContrarianChallenge(mockContext, 'I support universal healthcare');
+    const result = await generateContrarian(mockContext, 'I support universal healthcare');
 
-    expect(updateScores).toHaveBeenCalledWith(
-      mockContext.alignmentScores,
-      'I support universal healthcare',
-      'Healthcare System'
-    );
+    expect(updateScores).toHaveBeenCalledWith(mockContext.alignmentScores, 'I support universal healthcare', 'Healthcare System');
     expect(result.updatedScores).toEqual(updatedScores);
   });
 });

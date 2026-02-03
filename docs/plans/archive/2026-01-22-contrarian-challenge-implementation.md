@@ -1,7 +1,7 @@
-# Contrarian Challenge Feature - Implementation Plan
+# The Contrarian Feature - Implementation Plan
 
 ## Overview
-Implement the Contrarian Challenge feature following the brainstorm document. This feature allows users to engage with a quantitative contrarian AI that challenges their political stances using statistics.
+Implement The Contrarian feature following the brainstorm document. This feature allows users to engage with a quantitative contrarian AI that challenges their political stances using statistics.
 
 ## Implementation Strategy
 Execute in phases: Foundation → Core Functionality → Scoring → Polish
@@ -10,7 +10,7 @@ Execute in phases: Foundation → Core Functionality → Scoring → Polish
 
 ## Phase 1: Foundation
 
-### Task 1.1: Add "Contrarian Challenge" Tab to Navigation
+### Task 1.1: Add "The Contrarian" Tab to Navigation
 **File**: `src/app/page.tsx`
 - Add `'contrarian'` to `ActiveTab` type
 - Add third tab button in header navigation
@@ -23,7 +23,7 @@ Execute in phases: Foundation → Core Functionality → Scoring → Polish
 
 ### Task 1.2: Parse Topics from political_topics.md
 **File**: `src/lib/contrarian/topics.ts` (new)
-- Read `docs/political_topics.md`
+- Read `docs/data-sources/political_topics.md`
 - Parse markdown headings (### Topic Name) to extract topics
 - Create `CONTRARIAN_TOPICS` constant array
 - Export topic list and validation function
@@ -281,7 +281,7 @@ Execute in phases: Foundation → Core Functionality → Scoring → Polish
 ## Verification Checklist
 
 After all tasks complete:
-- [ ] Tab navigation works (Analysis, Socratic Circle, Contrarian Challenge)
+- [ ] Tab navigation works (Analysis, Socratic Circle, The Contrarian)
 - [ ] Topics display and can be selected
 - [ ] Conversation starts when topic selected
 - [ ] User can type and submit responses

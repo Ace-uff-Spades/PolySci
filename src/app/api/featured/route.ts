@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getFeaturedStories } from '@/lib/news-service';
+import { jsonError } from '../utils';
 
 export async function GET() {
   try {
@@ -7,9 +8,6 @@ export async function GET() {
     return NextResponse.json({ stories });
   } catch (error) {
     console.error('Failed to fetch featured stories:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch featured stories' },
-      { status: 500 }
-    );
+    return jsonError('Failed to fetch featured stories', 500);
   }
 }

@@ -1,7 +1,7 @@
 import { fetchBLSData, BLS_SERIES, BLSDataPoint } from './bls';
 import { getFederalSpendingOverview, searchSpending } from './usaspending';
 import { getPopulationData, getMedianIncomeData, CensusDataPoint } from './census';
-import { searchBills, Bill } from './congress';
+import { searchBills, filterBillsByTopic, Bill } from './congress';
 import { getEnergyDataForTopic, EIASeriesData } from './eia';
 import { getEconomicDataForTopic, FREDSeriesData, FRED_SERIES } from './fred';
 import { getTopicDataConfig } from './topic-mapping';
@@ -29,21 +29,31 @@ export interface GovernmentData {
   };
 }
 
+export interface GatherGovernmentDataOptions {
+  /** When true, skip cache read and write (e.g. for eval pipeline) */
+  skipCache?: boolean;
+}
+
 /**
  * Gather government data for a topic
  * Uses caching and topic-aware data selection
  */
 export async function gatherGovernmentData(
-  topic: string
+  topic: string,
+  options?: GatherGovernmentDataOptions
 ): Promise<GovernmentData> {
-  // Check cache first
-  const cached = await getCachedGovernmentData(topic);
-  if (cached) {
-    console.log(`Government data cache hit for topic: ${topic}`);
-    return cached;
-  }
+  const skipCache = options?.skipCache ?? false;
 
-  console.log(`Government data cache miss for topic: ${topic}`);
+  if (!skipCache) {
+    const cached = await getCachedGovernmentData(topic);
+    if (cached) {
+      console.log(`Government data cache hit for topic: ${topic}`);
+      return cached;
+    }
+    console.log(`Government data cache miss for topic: ${topic}`);
+  } else {
+    console.log(`Government data cache skipped for topic: ${topic}`);
+  }
 
   const results: GovernmentData = {
     economic: {},
@@ -174,15 +184,16 @@ export async function gatherGovernmentData(
           break;
         case 'bills':
           if (data && data.length > 0) {
-            results.legislative.relatedBills = data;
+            results.legislative.relatedBills = filterBillsByTopic(data, searchKeywords);
           }
           break;
       }
     }
   });
 
-  // Cache the results
-  await cacheGovernmentData(topic, results);
+  if (!skipCache) {
+    await cacheGovernmentData(topic, results);
+  }
 
   return results;
 }

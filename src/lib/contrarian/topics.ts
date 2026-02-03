@@ -1,4 +1,4 @@
-// Topics extracted from docs/political_topics.md
+// Topics extracted from docs/data-sources/political_topics.md
 export const CONTRARIAN_TOPICS = [
   'Abortion Rights',
   'LGBTQ+ Rights',
@@ -23,7 +23,7 @@ export function isValidTopic(topic: string): topic is ContrarianTopic {
   return CONTRARIAN_TOPICS.includes(topic as ContrarianTopic);
 }
 
-// Topic descriptions from political_topics.md
+// Topic descriptions from docs/data-sources/political_topics.md
 export const TOPIC_DESCRIPTIONS: Record<ContrarianTopic, string> = {
   'Abortion Rights': 'Access as reproductive freedom (left) vs. restrictions/pro-life protections (right). One of the strongest historical wedge issues.',
   'LGBTQ+ Rights': 'Strong support for expansion/inclusion (left) vs. emphasis on traditional norms/religious freedoms (right).',

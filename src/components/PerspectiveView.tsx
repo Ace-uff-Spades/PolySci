@@ -10,31 +10,31 @@ interface PerspectiveViewProps {
 
 const lensColors = {
   liberalism: {
-    border: 'border-blue-500',
-    bg: 'bg-blue-50',
-    text: 'text-blue-900',
+    border: 'border-[#475569]',
+    bg: 'bg-[#F5F5F4]',
+    text: 'text-[#475569]',
   },
   conservatism: {
-    border: 'border-red-500',
-    bg: 'bg-red-50',
-    text: 'text-red-900',
+    border: 'border-[#6B8E6F]',
+    bg: 'bg-[#F5F5F4]',
+    text: 'text-[#6B8E6F]',
   },
   socialism: {
-    border: 'border-yellow-500',
-    bg: 'bg-yellow-50',
-    text: 'text-yellow-900',
+    border: 'border-[#F59E0B]',
+    bg: 'bg-[#F5F5F4]',
+    text: 'text-[#D97706]',
   },
   libertarianism: {
-    border: 'border-purple-500',
-    bg: 'bg-purple-50',
-    text: 'text-purple-900',
+    border: 'border-[#78716C]',
+    bg: 'bg-[#F5F5F4]',
+    text: 'text-[#78716C]',
   },
 };
 
 export function PerspectiveView({ content, lens }: PerspectiveViewProps) {
   if (!content) {
     return (
-      <div className="text-center py-12 text-gray-700">
+      <div className="text-center py-12 text-[#78716C]">
         <p>No perspective available</p>
       </div>
     );
@@ -69,13 +69,13 @@ export function PerspectiveView({ content, lens }: PerspectiveViewProps) {
               />
             ),
             p: ({ node, ...props }) => (
-              <p {...props} className="text-gray-900 leading-relaxed mb-4" />
+              <p {...props} className="text-[#1C1917] leading-relaxed mb-4" />
             ),
             ul: ({ node, ...props }) => (
-              <ul {...props} className="list-disc list-inside mb-4 space-y-2 text-gray-900" />
+              <ul {...props} className="list-disc list-inside mb-4 space-y-2 text-[#1C1917]" />
             ),
             ol: ({ node, ...props }) => (
-              <ol {...props} className="list-decimal list-inside mb-4 space-y-2 text-gray-900" />
+              <ol {...props} className="list-decimal list-inside mb-4 space-y-2 text-[#1C1917]" />
             ),
             li: ({ node, ...props }) => (
               <li {...props} className="ml-4" />
@@ -88,13 +88,13 @@ export function PerspectiveView({ content, lens }: PerspectiveViewProps) {
                 {...props}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
+                className="text-[#6B8E6F] hover:text-[#475569] underline font-medium"
               />
             ),
             blockquote: ({ node, ...props }) => (
               <blockquote
                 {...props}
-                className={`border-l-4 ${colors.border} pl-4 italic text-gray-800 my-4`}
+                className={`border-l-4 ${colors.border} pl-4 italic text-[#78716C] my-4`}
               />
             ),
           }}
@@ -109,12 +109,12 @@ export function PerspectiveView({ content, lens }: PerspectiveViewProps) {
           <h3 className={`text-lg font-semibold ${colors.text} mb-4`}>Sources</h3>
           <ul className="space-y-2">
             {sources.map((source) => (
-              <li key={source.number} className="text-sm text-gray-900">
+              <li key={source.number} className="text-sm text-[#1C1917]">
                 <a
                   href={source.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-700 hover:text-blue-900 underline font-medium"
+                  className="text-[#6B8E6F] hover:text-[#475569] underline font-medium"
                 >
                   {source.number}. {source.name}
                 </a>

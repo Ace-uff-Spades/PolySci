@@ -1,45 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidTopic } from '@/lib/contrarian/topics';
 import { AlignmentScores } from '@/lib/contrarian';
+import { jsonError, requireTopic, invalidTopicResponse } from '../../utils';
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic } = await request.json();
-
-    if (!topic || typeof topic !== 'string') {
-      return NextResponse.json(
-        { error: 'Topic is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!isValidTopic(topic)) {
-      return NextResponse.json(
-        { error: 'Invalid topic. Topic must be from the predefined list.' },
-        { status: 400 }
-      );
-    }
-
-    // Initial question
-    const initialQuestion = `What's your stance on ${topic}?`;
-
-    // Initial scores: all neutral (5)
-    const alignmentScores: AlignmentScores = {
-      liberalism: 5,
-      conservatism: 5,
-      socialism: 5,
-      libertarianism: 5,
-    };
-
-    return NextResponse.json({
-      initialQuestion,
-      alignmentScores,
-    });
+    const body = await request.json();
+    const topic = requireTopic(body);
+    if (topic instanceof NextResponse) return topic;
+    if (!isValidTopic(topic)) return invalidTopicResponse();
+    const alignmentScores: AlignmentScores = { liberalism: 5, conservatism: 5, socialism: 5, libertarianism: 5 };
+    return NextResponse.json({ initialQuestion: `What's your stance on ${topic}?`, alignmentScores });
   } catch (error) {
     console.error('Contrarian start error:', error);
-    return NextResponse.json(
-      { error: 'Failed to start conversation' },
-      { status: 500 }
-    );
+    return jsonError('Failed to start conversation', 500);
   }
 }

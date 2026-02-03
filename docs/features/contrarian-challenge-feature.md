@@ -1,10 +1,14 @@
-# Contrarian Challenge Feature - Brainstorm & Design
+# The Contrarian Feature - Brainstorm & Design
+
+**Note (2026-01-24)**: Recent improvements include structured response formatting, input validation, question handling, and citation linking fixes. See `project_state.md` for details.
+
+**Note (2026-01-31)**: **New architecture implemented.** Explicit stance: user articulates in chat, then clicks "I have a stance — challenge me" (or confirms "yes" when we ask "Is X your stance?"). Client sends `mode` (educational | contrarian), `explicitStanceAction`, `confirmedStance`. Stance detection in educational → confirmation prompt; no assumption that typed text is stance until explicit action. Educational: analysis + followUp only (no stats/legislation). Contrarian: stats/legislation only when direct match; CTAs (Learn more, Take action). Implementation: API routing, `detectStanceWithParaphrase`, stance button, confirmation flow, CTAs in ContrarianResponse. See `docs/plans/2026-01-31-contrarian-educational-architecture.md`.
 
 ## Feature Overview
 
-**Name**: "Contrarian Challenge" or "Challenge Your Views"
+**Name**: "The Contrarian" or "Challenge Your Views"
 
-**Purpose**: Help users solidify their political views by engaging with a quantitative contrarian AI that challenges their stances using accurate statistics and data. The feature tracks user alignment with four political lenses (Liberalism, Conservatism, Socialism, Libertarianism) on a 1-10 scale.
+**Purpose**: Help users strengthen their political views by engaging with a quantitative contrarian AI that challenges their stances using accurate statistics and data. The feature tracks user alignment with four political lenses (Liberalism, Conservatism, Socialism, Libertarianism) on a 1-10 scale. **Goal is to help users strengthen their views, not just play devil's advocate.**
 
 **Value Proposition**: 
 - Users test the strength of their beliefs through rigorous challenge
@@ -21,7 +25,7 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Header: PolySci                                          │
-│ Tabs: [Analysis] [Socratic Circle] [Contrarian Challenge]│
+│ Tabs: [Analysis] [Socratic Circle] [The Contrarian]│
 └─────────────────────────────────────────────────────────┘
 ┌──────────────────┬──────────────────────────────────────┐
 │                  │ ┌──────────────────────────────────┐ │
@@ -64,7 +68,7 @@
    - Tooltip on hover: "Your responses align X/10 with [Lens]"
 
 2. **Topic Selector** (Left Panel)
-   - Grid or list of topics from `political_topics.md`
+   - Grid or list of topics from `docs/data-sources/political_topics.md`
    - Selected topic highlighted
    - Click to start/reset conversation
    - Shows topic description on selection
@@ -319,7 +323,7 @@ seen in other universal systems?
 
 ## Topic Integration
 
-### Topic List from `political_topics.md`
+### Topic List from `docs/data-sources/political_topics.md`
 
 Parse the markdown file to extract topics:
 - Abortion Rights
@@ -351,9 +355,9 @@ Parse the markdown file to extract topics:
 ## Implementation Phases
 
 ### Phase 1: Foundation
-- [ ] Add "Contrarian Challenge" tab to navigation
+- [ ] Add "The Contrarian" tab to navigation
 - [ ] Create `ContrarianChallenge` component (basic layout)
-- [ ] Parse topics from `political_topics.md`
+- [ ] Parse topics from `docs/data-sources/political_topics.md`
 - [ ] Topic selector UI
 - [ ] Basic conversation UI (messages)
 

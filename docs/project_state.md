@@ -3,7 +3,7 @@
 ## Current Focus
 Building **PolySci** - a web app that helps users understand political news through balanced analysis, primary sources, and factual government data.
 
-**Current Task:** Fixing Contrarian Challenge UX issues discovered during testing.
+**Current Task:** Manual test of contrarian flow (stance button, confirmation, mode transitions, CTAs, anti-repetition in follow-ups). Optional: full eval suite, evals for stance/confirmation.
 
 ## Implementation Progress
 
@@ -62,16 +62,16 @@ Building **PolySci** - a web app that helps users understand political news thro
 - ✅ Task 8.7: Tab navigation in header (Analysis | Socratic Circle)
 - ✅ Task 8.8: Conditional rendering integration in main page
 
-### Phase 9: Contrarian Challenge Feature ✅
-- ✅ Task 9.1: Added "Contrarian Challenge" tab to navigation
-- ✅ Task 9.2: Parsed 15 topics from `political_topics.md` (`src/lib/contrarian/topics.ts`)
-- ✅ Task 9.3: Created ContrarianChallenge component with 2-panel layout
+### Phase 9: The Contrarian Feature ✅
+- ✅ Task 9.1: Added "The Contrarian" tab to navigation
+- ✅ Task 9.2: Parsed 15 topics from `docs/data-sources/political_topics.md` (`src/lib/contrarian/topics.ts`)
+- ✅ Task 9.3: Created Contrarian component (The Contrarian) with 2-panel layout
 - ✅ Task 9.4: Topic selector UI with descriptions
 - ✅ Task 9.5: Basic conversation UI (user/AI messages)
 - ✅ Task 9.6: Contrarian service types (`src/lib/contrarian/index.ts`)
 - ✅ Task 9.7: Contrarian prompts (`src/lib/contrarian/prompts.ts`) - TDD: 9 tests
 - ✅ Task 9.8: Scoring service with GPT-4o (`src/lib/contrarian/scoring.ts`) - TDD: 6 tests
-- ✅ Task 9.9: generateContrarianChallenge service - TDD: 4 tests
+- ✅ Task 9.9: generateContrarian service - TDD: 4 tests
 - ✅ Task 9.10: `/api/contrarian/start` endpoint
 - ✅ Task 9.11: `/api/contrarian/challenge` endpoint
 - ✅ Task 9.12: AlignmentScoreBox component with 4 meters
@@ -81,32 +81,159 @@ Building **PolySci** - a web app that helps users understand political news thro
 - ✅ Task 9.16: Source citation rendering (clickable [n] links)
 - ✅ Task 9.17: "I'm Done" button
 - ✅ Task 9.18: Input area with Send button
+- ✅ Task 9.19: Response formatter for structured responses (`response-formatter.ts`)
+- ✅ Task 9.20: Input validation with hybrid off-topic detection (`validation.ts`)
+- ✅ Task 9.21: Question handler for user questions (`question-handler.ts`)
+- ✅ Task 9.22: Updated prompts for concise, structured responses
+- ✅ Task 9.23: Fixed citation linking to handle all formats
+- ✅ Task 9.24: ContrarianResponse component for structured display
+- ✅ Task 9.25: Post-processing to avoid walls of text
+- ✅ Task 9.26: JSON Mode implementation - Zero parsing issues, structured output
+- ✅ Task 9.27: Two-stage pipeline - Stance analysis → challenge
+- ✅ Task 9.28: Dual statistics sections (Supporting/Challenging user stance)
+- ✅ Task 9.29: Enhanced Congress.gov integration for legislation queries
+- ✅ Task 9.30: Educational question handler with JSON mode
+
+### Phase 10: AI Eval System ✅
+- ✅ Task 10.1: Installed Braintrust and autoevals packages (industry standard for TypeScript/Next.js)
+- ✅ Task 10.2: Created eval directory structure (`src/lib/evals/`)
+- ✅ Task 10.3: Created The Contrarian dataset (7 test cases with probing questions)
+- ✅ Task 10.4: Created educational responses dataset (7 test cases)
+- ✅ Task 10.5: Implemented faithfulness scorer (validates statistics are in government data)
+- ✅ Task 10.6: Implemented relevancy scorer (checks response addresses user stance)
+- ✅ Task 10.7: Implemented alignment accuracy scorer (LLM-as-a-judge for alignment scores)
+- ✅ Task 10.8: Built eval runner (loads datasets, calls real APIs, runs scorers, outputs results)
+- ✅ Task 10.9: Added `npm run eval` script for running evals
+- ✅ Task 10.10: Split datasets into separate files (contrarian.ts, educational-responses.ts)
+- ✅ Task 10.11: Fixed OpenAI JSON schema issues (additionalProperties, required arrays, nullable syntax)
+- ✅ Task 10.12: Fixed Firebase lazy loading (prevents initialization errors in evals)
+- ✅ Task 10.13: Fixed scorer parameter issues (added input/context to Faithfulness and Relevancy)
+- ✅ Task 10.14: Added dataset filtering (`npm run eval:educational`, `npm run eval:contrarian`)
+- ✅ Task 10.15: Added individual error handling for scorers (prevents one failure from blocking others)
+- ✅ Task 10.16: Created analysis document for scoring issues (`docs/evals/evals-issues-analysis.md`)
 
 ## Recent Sessions
 
-### 2026-01-24 (Latest - UI Restructure)
+### 2026-01-31 (Validation fix, data-lack, UI, stance history, internal refactor)
+- **Validation:** "maintaining lower taxes" for Taxes & Wealth Redistribution was falsely flagged off-topic. Fixed: (1) core keyword match in ambiguous range (0.2–0.6)—if input contains any topic keyword, treat as on-topic; (2) improved GPT prompt for short stance answers; (3) pass last AI message as context to validator.
+- **Data-lack:** Prompts updated so model doesn't dwell on missing data—one brief notice max, then analysis uses only stats we have; follow-up question must not focus on lack of data.
+- **UI:** When chat starts, hide other topics and highlight selected; stance history in bottom-left; stance history passed to API and LLM context.
+- **Internal refactor:** Renamed "Contrarian Challenge" → "The Contrarian" throughout. ContrarianChallenge → Contrarian (component); ContrarianChallengeResponse → ContrarianOutput; generateContrarianChallenge → generateContrarian; contrarianChallengeSchema → contrarianSchema; contrarian-challenge.ts → contrarian.ts; CONTRARIAN_CHALLENGE_DATASET → CONTRARIAN_DATASET.
+
+### 2026-01-31 (Codebase refactor, contrarian anti-repetition, topic-mapping)
+- **Refactor:** Shared `lib/government/format.ts` for `formatGovernmentData()` (analysis, socratic, contrarian, evals); shared `app/api/utils.ts` (jsonError, requireTopic, invalidTopicResponse); socratic lens prompts templated + `LENS_DESCRIPTIONS` exported for contrarian; `NO_STANCE_PHRASES` in validation only, imported by question-handler. Tests updated (analysis mocks getOpenAIClient; contrarian mocks getJSONCompletion + stance-analysis; newsdata error test mock has `text()`).
+- **Contrarian anti-repetition:** When conversation history is present, system and user prompts instruct: do not repeat same statistics already cited; prefer different data category (e.g. if previously cited bill count, use unemployment/spending/income or specific bill next).
+- **Topic-mapping:** Added/expanded entries so contrarian topics get on-topic Congress (and where relevant spending) data: Abortion/Reproductive, LGBTQ+ Rights, Racial Justice & Systemic Racism, Criminal Justice & Policing, Free Speech & Cancel Culture, Religion in Public Life; Foreign Policy extended with military/defense.
+
+### 2026-01-31 (Contrarian / Educational architecture & UX)
+- **Design:** `docs/plans/2026-01-31-contrarian-educational-architecture.md` — End goals (educational: user has stance and articulates it; explicit action to state stance. Contrarian: strengthen understanding, change stance, learn legislation, take action; explicit surfacing). Option A: "I have a stance — challenge me" button; confirmation when user types stance without clicking ("Is X your stance?" → yes = contrarian, no = stay educational). Articulation: user types in chat first, then clicks. Contrarian surfacing: end-of-flow summary + CTAs (Learn legislation, Take action).
+- **Implementation:** API accepts `mode`, `explicitStanceAction`, `confirmedStance`; routes by explicit action → contrarian, mode=contrarian → contrarian, else `detectStanceWithParaphrase()` → confirmation or educational. Educational: analysis + followUp only (no stats). `detectStanceWithParaphrase()` in question-handler (cheap model). Contrarian UI: stance button, mode tracking, confirmation flow (affirmative reply = explicit action with confirmedStance), placeholders by mode. ContrarianResponse: educational analysis as ReactMarkdown; CTAs (Learn more, Take action) for challenge when sources present.
+
+### 2026-01-28–31 (Eval pipeline & educational relevancy)
+- **Eval pipeline:** Faithfulness skipped for educational responses. Government data: topic-mapping added for Taxes, Education, Gun, Size/Scope; client-side `filterBillsByTopic()` so bills shown are topic-relevant. Faithfulness scorer: "data does not contain X" statements treated as supported when context lacks X. Contrarian prompts: avoid unsupported claims, prefer "in the data we have we don't see X," no interpretive leaps.
+- **Educational relevancy:** Question-type detection expanded (e.g. "give me a stance", "what do you think" → opinion-seeking). Educational prompts: opinion-seeking = no-stance + perspectives first; factual-no-data = "we don't have that" + related data + follow-up offering to show data; legislation = only cite bills matching question topic; legislation bills filtered by question-topic words (no unrelated bills in prompt). Required at least one stat + valid sources so criteria pass. Per-case `relevancyThreshold` (0.3/0.5) and relaxed follow-up threshold for climate-factual, education-legislation, gun-control-factual. Educational dataset passes 7/7.
+- **Eval runner:** `EVAL_LIMIT` env var for quick runs (e.g. first N cases). Failed-criteria logging for educational. Dataset type: `npm run eval -- educational` or `contrarian` or `all`.
+
+### 2026-01-24 (AI Eval System Setup & Fixes)
+- Set up Braintrust eval framework for PolySci
+  - Installed `braintrust` and `autoevals` packages (industry standard for TypeScript/Next.js)
+  - Created eval system structure: datasets, scorers, runner
+- Created comprehensive eval datasets
+  - The Contrarian dataset: 7 test cases covering different topics and stances
+  - Educational responses dataset: 7 test cases (unknown stance, "what do you think", factual questions)
+  - Each case includes expected criteria and probing questions
+  - Split into separate files for clarity
+- Implemented three scorers
+  - Faithfulness: Uses Braintrust's Faithfulness evaluator (requires input, output, context)
+  - Relevancy: Uses AnswerRelevancy (requires input, output, context)
+  - Alignment Accuracy: Custom LLM-as-a-judge scorer for alignment score validation
+- Fixed schema issues for OpenAI JSON mode
+  - Added `additionalProperties: false` to all object schemas
+  - Added all properties to `required` arrays (including nullable fields)
+  - Changed nullable syntax from `nullable: true` to `type: ["number", "null"]`
+- Fixed Firebase initialization
+  - Made Firebase lazy-load (only initializes when accessed)
+  - Added graceful degradation for missing credentials
+  - Cache functions handle missing Firebase gracefully
+- Eval runner improvements
+  - Added `.env.local` loading for tsx execution
+  - Individual error handling for each scorer (prevents one failure from blocking others)
+  - Always displays all three scores (including alignment accuracy for educational responses)
+  - Added dataset filtering: `npm run eval:educational` or `npm run eval:contrarian`
+- Created analysis document (`docs/evals/evals-issues-analysis.md`)
+  - Documented root causes for scoring issues (alignment 100%, faithfulness 0%, relevancy low)
+  - Provided solutions and recommendations
+
+### 2026-01-24 (Latest - JSON Mode + Two-Stage Pipeline Refactor)
+- Implemented JSON Mode architecture for The Contrarian
+  - Created JSON schemas for stance analysis, The Contrarian, and educational responses
+  - Added `getJSONCompletion()` to OpenAI client with schema enforcement
+  - Eliminated parsing issues - JSON mode guarantees structured output
+- Implemented two-stage pipeline for balanced responses
+  - Stage 1: Stance analysis service (`stance-analysis.ts`) - Analyzes user stance merits first
+  - Stage 2: challenge - Uses stance analysis results for balanced challenge
+  - Always acknowledges stance merits before challenging
+- Enhanced response structure
+  - Dual statistics sections: "Statistics Supporting Your Stance" and "Statistics Challenging Your Stance" (1 stat each)
+  - Simplified response formatter (removed regex parsing, JSON mode handles it)
+  - Updated ContrarianResponse component to handle both challenge and educational responses
+- Improved educational question handling
+  - Converted question handler to JSON mode
+  - Added legislation detection and automatic Congress.gov bill fetching
+  - Educational responses now include direct answers, statistics, and legislation links
+- UI improvements
+  - Updated loading message to "the AI is thinking"
+  - Separate text blocks for each section (no more wall of text)
+- Plan cleanup
+  - Archived completed plans to `docs/plans/archive/`
+  - Moved PRD.md to docs/specs/
+  - Updated context-management.md
+
+### 2026-01-24 (Earlier - Contrarian Conversation Improvements)
+- Refactored The Contrarian conversation system
+  - Created structured response formatter (`response-formatter.ts`) - parses responses into sections
+  - Fixed citation linking to handle `[n1]`, `[1]`, `[n]` formats
+  - Updated prompts to generate concise, bullet-point responses (max 150 words)
+  - Added input validation with hybrid approach (keyword + GPT-4o) for off-topic detection
+  - Created question handler to detect and respond to user questions appropriately
+  - Post-processing ensures no walls of text, emphasizes statistics
+  - New `ContrarianResponse` component displays structured sections (acknowledgment, statistics, analysis, question)
+  - Goal changed from "devil's advocate" to "help users strengthen their stances"
+- Updated API route to integrate validation, question detection, and structured responses
+- All citations now properly linked in statistics
+
+### 2026-01-24 (UI Refactor)
+- Complete UI redesign with Modern Forum/Debate Hall aesthetic
+  - Color palette: Slate blue, sage green, warm gray, amber accents
+  - Typography: DM Sans (display) + IBM Plex Sans (body)
+  - Background: Subtle gradient mesh (slate blue → sage green)
+  - Staggered page load animations (100ms increments)
+  - Message slide-in animations (user from right, AI from left)
+  - Updated all components with new color scheme and styling
+  - Score meter transitions (400ms ease-out)
+  - Hover effects and micro-interactions throughout
 - Moved alignment scores from right panel header to left panel
 - Changed topics grid from 1-column to 2-column for compactness
 - Right panel is now chat-only
 
-### 2026-01-23 (Contrarian Challenge Bug Fixes)
+### 2026-01-23 (The Contrarian Bug Fixes)
 - Initialized git repo (was missing .git directory)
 - Fixed repetitive responses bug: stale React state was passing old conversation history to API
 - Gave chat UI more space: changed from 50/50 to 1/3-2/3 split
 - Investigated repeated sources: confirmed expected behavior (government data sources are fixed agencies)
 - Audited alignment scoring: verified GPT-4o semantic analysis + 60/40 weighting works correctly
 
-### 2026-01-23 (Earlier - Contrarian Challenge UI Fixes)
-- Fixed Contrarian Challenge UI issues:
+### 2026-01-23 (Earlier - The Contrarian UI Fixes)
+- Fixed The Contrarian UI issues:
   - Input text was blending with background (added explicit text colors)
   - Score box was covering conversation (moved to inline header)
   - Response overflow (restructured to flexbox layout)
   - Improved markdown formatting for AI responses
 - Created `/housekeep` Claude Code command (`.claude/commands/housekeep.md`)
-- Cleaned up lint issues in ContrarianChallenge component
+- Cleaned up lint issues in Contrarian component
 
-### 2026-01-22 (Contrarian Challenge Feature)
-- Implemented Contrarian Challenge feature
+### 2026-01-22 (The Contrarian Feature)
+- Implemented The Contrarian feature
   - Created contrarian AI service that challenges user stances with quantitative evidence
   - Built alignment scoring system (GPT-4o semantic analysis, 1-10 scale per lens)
   - Added 15 political topics from `political_topics.md`
@@ -114,14 +241,14 @@ Building **PolySci** - a web app that helps users understand political news thro
   - Built conversation interface with source citations
   - Added `/api/contrarian/start` and `/api/contrarian/challenge` endpoints
   - Followed TDD: 19 tests passing (prompts, scoring, service)
-  - Tab navigation: Analysis | Socratic Circle | Contrarian Challenge
+  - Tab navigation: Analysis | Socratic Circle | The Contrarian
 - Socratic Circle improvements
   - Condensed summaries to 1-2 sentences
   - Fixed [n] citations to always be clickable links
   - Removed Quantitative Evidence bullet limit
   - Made Key Points section more succinct
 - Manual integration testing completed
-  - All features tested: Analysis, Socratic Circle, Contrarian Challenge
+  - All features tested: Analysis, Socratic Circle, The Contrarian
   - All endpoints verified working
   - UI/UX verified across all features
   - Error handling and loading states verified
@@ -134,7 +261,7 @@ Building **PolySci** - a web app that helps users understand political news thro
   - Refactored `gatherGovernmentData()` to be topic-aware (fetches relevant data per topic)
   - Implemented government data caching layer (6-hour TTL, Firebase Firestore)
   - Updated data formatting to include EIA, FRED, and topic-specific spending data
-  - Documented limitations of all 6 data sources in `docs/government-data-sources.md`
+  - Documented limitations of all 6 data sources in `docs/data-sources/government-data-sources.md`
   - Fixed FRED API authentication (changed to Bearer token header for v2 API)
   - Improved EIA API endpoint structure
   - Created API key verification utility
@@ -280,7 +407,7 @@ Building **PolySci** - a web app that helps users understand political news thro
     - [x] Test all 4 perspectives generate correctly
     - [x] Verify perspective tabs work
     - [x] Verify sources are extracted and clickable
-  - [x] Test Contrarian Challenge feature
+  - [x] Test The Contrarian feature
     - [x] Test topic selection (15 topics)
     - [x] Test conversation flow (initial question → user stance → challenge)
     - [x] Verify alignment scores update in real-time
@@ -294,15 +421,41 @@ Building **PolySci** - a web app that helps users understand political news thro
     - [x] Verify FRED data for economic topics
     - [x] Verify topic-specific spending searches
     - [x] Test caching (same topic should use cache)
-- [x] **Contrarian Challenge Issues (Priority)** ✅
+- [x] **The Contrarian Issues (Priority)** ✅
   - [x] Fix contrarian agent repetitive responses - was stale React state bug (now passes [...conversation, userMessage])
   - [x] Audit alignment score tracking - verified: GPT-4o semantic analysis + 60/40 weighting works correctly
   - [x] Give chat UI more space - changed to 1/3-2/3 split (was 50/50)
   - [x] Investigate repeated sources - expected behavior: government sources ARE from fixed agencies (BLS, Census, etc.)
+- [x] Fix eval scoring issues (see `docs/evals/evals-issues-analysis.md`) ✅
+  - [x] Alignment: skip for educational; custom LLM judge for challenge
+  - [x] Faithfulness: skip for educational; custom judge; "data does not contain" supported when true
+  - [x] Relevancy: custom scorers; educational prompts + per-case thresholds for no-data cases
+- [x] Run AI evals and tune ✅
+  - [x] Educational dataset passes 7/7 (`npm run eval -- educational`)
+  - [x] EVAL_LIMIT for quick iteration; dataset filter (educational | contrarian | all)
+- [x] **Contrarian UX with new architecture** ✅
+  - [x] Explicit stance: "I have a stance — challenge me" button; client sends mode, explicitStanceAction, confirmedStance
+  - [x] Stance detection + confirmation prompt when user types stance without clicking; yes/no handling
+  - [x] Educational: analysis + followUp only; contrarian: stats only when direct match; CTAs on challenge
+- [x] **Codebase refactor** ✅ (shared government format, API utils, socratic lens template, NO_STANCE_PHRASES; tests fixed)
+- [x] **Contrarian anti-repetition** ✅ (prompts: when history present, do not repeat same statistics; prefer different data category)
+- [x] **Topic-mapping for contrarian topics** ✅ (Abortion, LGBTQ+, Racial Justice, Criminal Justice, Free Speech, Religion; Foreign Policy + military)
+- [x] **Validation fix** ✅ (core keyword match for ambiguous range; "maintaining lower taxes" on-topic)
+- [x] **Data-lack handling** ✅ (brief notice, stats-only analysis, non-lack follow-up questions)
+- [x] **The Contrarian UI** ✅ (hide topics when chat starts; stance history bottom-left; stance history in LLM context)
+- [x] **Internal refactor** ✅ (Contrarian component, ContrarianOutput, generateContrarian, contrarian.ts dataset, contrarianSchema)
+- [ ] Run full eval suite (`npm run eval` or `npm run eval -- all`) and tune contrarian pass rate if needed
+- [ ] Test new contrarian flow (stance button, confirmation, mode transitions, CTAs)
+- [ ] Test JSON Mode + Two-Stage Pipeline (stance analysis, dual stats, response parsing)
+- [ ] Test UI refactor across all features (Analysis, Socratic Circle, The Contrarian)
 - [ ] Add error boundaries for better error handling in UI
 - [ ] Consider adding retry logic for failed API calls
 - [ ] Update follow-up endpoint to use non-streaming (currently still uses SSE)
 - [ ] Register and configure optional API keys (EIA_API_KEY, FRED_API_KEY) for enhanced data
+- [ ] Update tests for JSON mode responses (remove parsing tests, add JSON schema tests)
+- [ ] Consider evals for explicit stance/confirmation flows (contrarian)
+- [ ] Add evals for Analysis feature
+- [ ] Add evals for Socratic Circle feature
 
 ## Tech Stack
 - **Frontend**: Next.js 14, React, Tailwind CSS
@@ -312,9 +465,11 @@ Building **PolySci** - a web app that helps users understand political news thro
 - **APIs**: 
   - News: Newsdata.io
   - Government: BLS, USASpending, Census, Congress.gov, EIA (optional), FRED (optional)
-- **Testing**: Vitest (TDD methodology)
+- **Testing**: Vitest (TDD methodology) + Braintrust (AI evals)
 - **Response Format**: JSON (streaming removed for better formatting)
-- **Features**: Analysis, Socratic Circle, Contrarian Challenge
+- **Features**: Analysis, Socratic Circle, The Contrarian
+- **The Contrarian Architecture**: Explicit stance (button or confirm "yes"); mode (educational | contrarian); stance detection → confirmation or educational; JSON Mode + two-stage; stats only when direct match; CTAs (Learn more, Take action); anti-repetition in follow-ups (when history present, vary statistics/data category); stance history in LLM context; data-lack: brief notice only, focus on stats we have. Topic-mapping: all 15 topics have specific Congress (and where relevant spending) keywords. Component: `Contrarian.tsx`; types: `ContrarianOutput`; service: `generateContrarian()`; dataset: `contrarian.ts`, `CONTRARIAN_DATASET`.
+- **Eval System**: Custom scorers (faithfulness, relevancy+followUp/relevancy+alignment); 14 cases (7 challenge + 7 educational); faithfulness skipped for educational; per-case relevancy thresholds; `EVAL_LIMIT` env; `npm run eval [all|contrarian|educational]`
 
 ## Approaches & Lessons
 - Claude Code hooks are reminder-based, not automation - they prompt the agent but can't perform context-aware file operations themselves

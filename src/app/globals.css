@@ -1,26 +1,95 @@
 @import "tailwindcss";
 
 :root {
+  /* Color System - Cool Balanced Palette */
+  --color-slate-blue: #475569;
+  --color-slate-blue-dark: #334155;
+  --color-sage-green: #6B8E6F;
+  --color-warm-gray-50: #F5F5F4;
+  --color-warm-gray-100: #E7E5E4;
+  --color-warm-gray-200: #D6D3D1;
+  --color-warm-gray-400: #78716C;
+  --color-warm-gray-800: #1C1917;
+  --color-amber: #F59E0B;
+  --color-amber-dark: #D97706;
+  
+  /* Legacy vars for compatibility */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1C1917;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-display: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: linear-gradient(135deg, rgba(71, 85, 105, 0.02) 0%, rgba(107, 142, 111, 0.02) 100%),
+              var(--color-warm-gray-50);
+  background-attachment: fixed;
+  color: var(--color-warm-gray-800);
+  font-family: var(--font-ibm-plex-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Staggered reveal animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+/* Message slide animations */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

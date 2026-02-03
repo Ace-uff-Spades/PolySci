@@ -31,12 +31,14 @@ Work style: telegraph; noun-phrases ok; drop grammar; min tokens.
 
 
 # Proactiveness
-When asked to do something, just do it - including obvious follow-up actions needed to complete the task properly.
-  Only pause to ask for confirmation when:
+- When asked to do something, just do it - including obvious follow-up actions needed to complete the task properly.
+- Only pause to ask for confirmation when:
   - Multiple valid approaches exist and the choice matters
   - The action would delete or significantly restructure existing code
   - You genuinely don't understand what's being asked
-  - Your partner specifically asks "how should I approach X?" (answer the question, don't jump to implementation)
+- If your partner specifically asks "how should I approach X?" or "How do you propose we fix X?" or something along those lines, then answer the question, don't jump to implementation
+- If there are improvements that can be made to the current task at hand. Raise them at the end of the implementation as suggestions to think about. 
+
 
 ## Designing software
 - YAGNI. The best code is no code. Don't add features we don't need right now.
@@ -86,7 +88,7 @@ YOU MUST write comments explaining WHAT and WHY, never temporal context or what 
 
 
 ## Issue tracking
-- You MUST use your TodoWrite tool to keep track of what you're doing 
+- You MUST always keep track of what you're doing in the todo list in the project_state.md doc. 
 - You MUST NEVER discard tasks from your TodoWrite todo list without Abhi's explicit approval
 
 ## Systematic Debugging Process

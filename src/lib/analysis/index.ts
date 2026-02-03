@@ -16,7 +16,6 @@ export interface AnalysisContext {
 }
 
 export async function gatherContext(topic: string): Promise<AnalysisContext> {
-  // Fetch news and government data in parallel
   const [newsArticles, governmentData] = await Promise.all([
     getNewsForQuery(topic),
     gatherGovernmentData(topic),
@@ -30,149 +29,57 @@ export async function gatherContext(topic: string): Promise<AnalysisContext> {
   };
 }
 
-export async function* streamAnalysis(
-  context: AnalysisContext
-): AsyncGenerator<string> {
-  const systemPrompt = buildAnalysisSystemPrompt();
-  const userPrompt = buildAnalysisUserPrompt(
-    context.topic,
-    context.newsArticles,
-    context.governmentData
-  );
-
-  let fullResponse = '';
-
-  // Stream directly from OpenAI to yield chunks as they come
+export async function* streamAnalysis(context: AnalysisContext): AsyncGenerator<string> {
   const client = getOpenAIClient();
-
-  const stream = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    stream: true,
-  });
-
+  const system = buildAnalysisSystemPrompt();
+  const user = buildAnalysisUserPrompt(context.topic, context.newsArticles, context.governmentData);
+  let fullResponse = '';
+  const stream = await client.chat.completions.create({ model: 'gpt-4o', messages: [{ role: 'system', content: system }, { role: 'user', content: user }], stream: true });
   for await (const chunk of stream) {
     const content = chunk.choices[0]?.delta?.content;
-    if (content) {
-      fullResponse += content;
-      yield content;
-    }
+    if (content) { fullResponse += content; yield content; }
   }
-
-  // Store in history for follow-ups
   context.analysisHistory.push(fullResponse);
 }
 
-export async function generateAnalysis(
-  context: AnalysisContext
-): Promise<string> {
-  const systemPrompt = buildAnalysisSystemPrompt();
-  const userPrompt = buildAnalysisUserPrompt(
-    context.topic,
-    context.newsArticles,
-    context.governmentData
-  );
-
+export async function generateAnalysis(context: AnalysisContext): Promise<string> {
   const client = getOpenAIClient();
-
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    stream: false,
-  });
-
-  const fullResponse = response.choices[0]?.message?.content || '';
-  
-  // Store in history for follow-ups
+  const system = buildAnalysisSystemPrompt();
+  const user = buildAnalysisUserPrompt(context.topic, context.newsArticles, context.governmentData);
+  const res = await client.chat.completions.create({ model: 'gpt-4o', messages: [{ role: 'system', content: system }, { role: 'user', content: user }], stream: false });
+  const fullResponse = res.choices[0]?.message?.content || '';
   context.analysisHistory.push(fullResponse);
-  
   return fullResponse;
 }
 
-export async function generateFollowUp(
-  context: AnalysisContext,
-  question: string
-): Promise<string> {
-  const systemPrompt = buildFollowUpSystemPrompt();
-  const lastAnalysis = context.analysisHistory[context.analysisHistory.length - 1] ?? '';
-  const userPrompt = buildFollowUpPrompt(lastAnalysis, question);
-
+export async function generateFollowUp(context: AnalysisContext, question: string): Promise<string> {
   const client = getOpenAIClient();
-
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    stream: false,
-  });
-
-  const fullResponse = response.choices[0]?.message?.content || '';
+  const system = buildFollowUpSystemPrompt();
+  const lastAnalysis = context.analysisHistory[context.analysisHistory.length - 1] ?? '';
+  const user = buildFollowUpPrompt(lastAnalysis, question);
+  const res = await client.chat.completions.create({ model: 'gpt-4o', messages: [{ role: 'system', content: system }, { role: 'user', content: user }], stream: false });
+  const fullResponse = res.choices[0]?.message?.content || '';
   context.analysisHistory.push(fullResponse);
-  
   return fullResponse;
 }
 
-export async function* streamFollowUp(
-  context: AnalysisContext,
-  question: string
-): AsyncGenerator<string> {
-  const systemPrompt = buildFollowUpSystemPrompt();
-  const lastAnalysis = context.analysisHistory[context.analysisHistory.length - 1] ?? '';
-  const userPrompt = buildFollowUpPrompt(lastAnalysis, question);
-
-  let fullResponse = '';
-
-  // Stream directly from OpenAI
+export async function* streamFollowUp(context: AnalysisContext, question: string): AsyncGenerator<string> {
   const client = getOpenAIClient();
-
-  const stream = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    stream: true,
-  });
-
+  const system = buildFollowUpSystemPrompt();
+  const lastAnalysis = context.analysisHistory[context.analysisHistory.length - 1] ?? '';
+  const user = buildFollowUpPrompt(lastAnalysis, question);
+  let fullResponse = '';
+  const stream = await client.chat.completions.create({ model: 'gpt-4o', messages: [{ role: 'system', content: system }, { role: 'user', content: user }], stream: true });
   for await (const chunk of stream) {
     const content = chunk.choices[0]?.delta?.content;
-    if (content) {
-      fullResponse += content;
-      yield content;
-    }
+    if (content) { fullResponse += content; yield content; }
   }
-
   context.analysisHistory.push(fullResponse);
 }
 
-export async function generateFollowUpSuggestions(
-  analysis: string
-): Promise<string[]> {
-  // Generate contextual follow-up suggestions based on the analysis content
+export async function generateFollowUpSuggestions(analysis: string): Promise<string[]> {
   const client = getOpenAIClient();
-
-  const prompt = `Based on this political analysis, generate 5 relevant follow-up questions that would help the user understand the topic better. Make them specific to the content discussed, not generic.
-
-Analysis:
-${analysis}
-
-Generate exactly 5 questions, one per line, without numbering or bullets. Focus on:
-- Specific aspects mentioned in the analysis
-- Deeper dives into key points
-- Related implications or consequences
-- Historical comparisons or context
-- Practical impacts
-
-Return only the questions, one per line.`;
-
+  const prompt = `Based on this political analysis, generate 5 relevant follow-up questions that would help the user understand the topic better. Make them specific to the content discussed, not generic.\n\nAnalysis:\n${analysis}\n\nGenerate exactly 5 questions, one per line, without numbering or bullets. Return only the questions, one per line.`;
   try {
     const response = await client.chat.completions.create({
       model: 'gpt-4o',

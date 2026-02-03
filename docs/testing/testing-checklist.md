@@ -76,8 +76,8 @@ npm run dev
 5. [ ] Switch between perspective tabs
 6. [ ] Verify each perspective has proper color coding and formatting
 
-### Step 7: Test Contrarian Challenge Feature
-1. [ ] Click "Contrarian Challenge" tab in header
+### Step 7: Test The Contrarian Feature
+1. [ ] Click "The Contrarian" tab in header
 2. [ ] Verify topic selector appears in left panel (15 topics)
 3. [ ] Select a topic (e.g., "Healthcare System")
 4. [ ] Verify:
@@ -87,7 +87,7 @@ npm run dev
 6. [ ] Click "Send"
 7. [ ] Verify:
    - [ ] Loading state: "AI is challenging your view..."
-   - [ ] Contrarian challenge appears with statistics
+   - [ ] Challenge response appears with statistics
    - [ ] Alignment scores update in real-time (meters animate)
    - [ ] Sources are clickable [n] citations
    - [ ] Follow-up question appears
@@ -100,7 +100,7 @@ npm run dev
 1. [ ] Test with invalid API keys (should show error message)
 2. [ ] Test with network disconnected (should handle gracefully)
 3. [ ] Test with empty topic (should not submit)
-4. [ ] Test Contrarian Challenge error handling (retry button works)
+4. [ ] Test The Contrarian error handling (retry button works)
 
 ## Expected Behavior
 
@@ -125,7 +125,7 @@ npm run dev
 - Returns JSON: `{ perspectives: { liberalism, conservatism, socialism, libertarianism } }`
 - Generates 4 perspectives in parallel
 
-### Contrarian Challenge Endpoints
+### The Contrarian Endpoints
 - `/api/contrarian/start`: Accepts `{ topic: string }`, returns `{ initialQuestion, alignmentScores }`
 - `/api/contrarian/challenge`: Accepts `{ topic, userStance, conversationHistory, currentScores }`, returns `{ challenge, updatedScores, followUpQuestion, sources }`
 
@@ -135,4 +135,4 @@ npm run dev
 - No conversation persistence
 - No URL parsing for articles
 - No personalized recommendations
-- Contrarian Challenge scores reset on page refresh (no persistence)
+- The Contrarian scores reset on page refresh (no persistence)

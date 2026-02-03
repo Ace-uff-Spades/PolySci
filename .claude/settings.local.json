@@ -1,4 +1,15 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "mcp__plugin_claude-journal_journal__journal_auto_capture",
+      "mcp__magicuidesign__getUIComponents",
+      "mcp__magicuidesign__getBackgrounds",
+      "mcp__magicuidesign__getAnimations",
+      "mcp__magicuidesign__getButtons"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "github",
     "firebase-mcp-server",

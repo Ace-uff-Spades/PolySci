@@ -92,6 +92,8 @@ PolySci uses multiple government data sources to provide quantitative evidence f
 - Bill titles and summaries
 - Legislative history
 
+**Topic mapping**: `topic-mapping.ts` defines `congressKeywords` per topic (e.g. healthcare, immigration, taxes, education, gun, size/scope of government). Results are filtered client-side by bill title (`filterBillsByTopic`) so only topic-relevant bills are shown.
+
 **Caching**: 6 hours
 
 ---

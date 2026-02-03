@@ -1,13 +1,6 @@
 import { getOpenAIClient } from '../openai';
-import { PoliticalLens } from '../socratic/prompts';
+import { PoliticalLens, LENS_DESCRIPTIONS } from '../socratic/prompts';
 import { AlignmentScores } from './index';
-
-const lensDescriptions: Record<PoliticalLens, string> = {
-  liberalism: 'Liberalism emphasizes individual rights, democracy, free markets with appropriate regulation, social justice, and the role of government in protecting civil liberties and ensuring equal opportunity.',
-  conservatism: 'Conservatism emphasizes tradition, limited government, free markets, individual responsibility, and the preservation of established institutions.',
-  socialism: 'Socialism emphasizes collective ownership, social equality, public services, workers\' rights, and reducing economic inequality through government intervention and social programs.',
-  libertarianism: 'Libertarianism emphasizes individual liberty, minimal government intervention, free markets, property rights, and voluntary association.',
-};
 
 export async function calculateAlignmentScore(
   userStance: string,
@@ -15,10 +8,9 @@ export async function calculateAlignmentScore(
   topic: string
 ): Promise<number> {
   const client = getOpenAIClient();
-  
   const systemPrompt = `You are a political alignment analyzer. Your task is to rate how well a user's political stance aligns with a specific political lens on a scale of 1-10.
 
-${lensDescriptions[lens]}
+${LENS_DESCRIPTIONS[lens]}
 
 Return ONLY a single number between 1 and 10, where:
 - 1-3: Very low alignment

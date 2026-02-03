@@ -9,15 +9,15 @@
 - `docs/context-management.md` - Context optimization guidelines (~59 lines)
 
 ### Recently Referenced (Session-Specific)
-- `docs/testing-checklist.md` - Testing procedures (~139 lines)
-- `docs/political_topics.md` - Topic list for Contrarian Challenge (~45 lines)
-- `docs/contrarian-challenge-feature.md` - Feature brainstorm (~491 lines)
-- `docs/plans/2026-01-22-contrarian-challenge-implementation.md` - Implementation plan (completed)
+- `docs/testing/testing-checklist.md` - Testing procedures (~139 lines)
+- `docs/data-sources/political_topics.md` - Topic list for The Contrarian (~45 lines)
+- `docs/features/contrarian-challenge-feature.md` - Feature brainstorm (~491 lines)
+- `docs/plans/2026-01-31-contrarian-educational-architecture.md` - Explicit stance, confirmation, mode, CTAs (implemented)
 
 ### Code Files (Only When Modifying)
-- Contrarian Challenge implementation:
+- The Contrarian implementation:
   - `src/lib/contrarian/*.ts` - Service layer, prompts, scoring
-  - `src/components/ContrarianChallenge.tsx` - Main component
+  - `src/components/Contrarian.tsx` - Main component
   - `src/components/AlignmentScoreBox.tsx` - Score meters
   - `src/app/api/contrarian/*/route.ts` - API endpoints
 
@@ -90,8 +90,8 @@ codebase_search('Where are API endpoints defined?')
 - Active files being modified
 
 **Medium Priority (Read When Relevant):**
-- `docs/government-data-sources.md` - API details (only when working with gov APIs)
-- `docs/testing-checklist.md` - Testing procedures (only when testing)
+- `docs/data-sources/government-data-sources.md` - API details (only when working with gov APIs)
+- `docs/testing/testing-checklist.md` - Testing procedures (only when testing)
 - Component files (only when modifying that component)
 
 **Low Priority (Avoid Unless Necessary):**
@@ -136,12 +136,12 @@ codebase_search('Where are API endpoints defined?')
 ### Features Implemented
 - **Analysis**: News + government data → GPT-4o analysis
 - **Socratic Circle**: 4 political perspectives on topics
-- **Contrarian Challenge**: Quantitative contrarian AI with alignment scoring
+- **The Contrarian**: Quantitative contrarian AI with alignment scoring
 
 ### Key Directories
 - `src/lib/analysis/` - Analysis engine
 - `src/lib/socratic/` - Socratic Circle service
-- `src/lib/contrarian/` - Contrarian Challenge service
+- `src/lib/contrarian/` - The Contrarian service
 - `src/lib/government/` - 6 government data APIs
 - `src/components/` - React components
 - `src/app/api/` - Next.js API routes

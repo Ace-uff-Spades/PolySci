@@ -1,146 +1,99 @@
-import { PoliticalLens } from '../socratic/prompts';
+import { PoliticalLens, LENS_DESCRIPTIONS } from '../socratic/prompts';
 import { GovernmentData } from '../government';
+import { formatGovernmentData } from '../government/format';
 import { ContrarianMessage } from './index';
-
-function formatGovernmentData(data: GovernmentData): string {
-  const sections: string[] = [];
-
-  // Core economic indicators
-  if (data.economic.unemployment?.length) {
-    const latest = data.economic.unemployment[0];
-    sections.push(`Unemployment Rate: ${latest.value}% (${latest.periodName} ${latest.year})`);
-  }
-
-  if (data.economic.inflation?.length) {
-    const latest = data.economic.inflation[0];
-    sections.push(`CPI (Inflation Index): ${latest.value} (${latest.periodName} ${latest.year})`);
-  }
-
-  // FRED economic data
-  if (data.economic.fred && data.economic.fred.length > 0) {
-    data.economic.fred.slice(0, 5).forEach((series) => {
-      if (series.data && series.data.length > 0) {
-        const latest = series.data[0];
-        if (latest.value !== null) {
-          const value = typeof latest.value === 'number' 
-            ? latest.value.toLocaleString(undefined, { maximumFractionDigits: 2 })
-            : latest.value;
-          sections.push(`${series.title}: ${value}${series.units ? ` ${series.units}` : ''} (${latest.date})`);
-        }
-      }
-    });
-  }
-
-  // Spending data
-  if (data.spending.overview?.totalBudget) {
-    sections.push(`Federal Budget: $${(data.spending.overview.totalBudget / 1e12).toFixed(2)} trillion`);
-  }
-
-  // Topic-specific spending
-  if (data.spending.related && data.spending.related.length > 0) {
-    sections.push(`Topic-related spending: ${data.spending.related.length} records found`);
-    const totalSpending = data.spending.related
-      .slice(0, 5)
-      .reduce((sum: number, item: any) => sum + (item.total_obligation || 0), 0);
-    if (totalSpending > 0) {
-      sections.push(`  Total: $${(totalSpending / 1e9).toFixed(2)} billion`);
-    }
-  }
-
-  // Demographic data
-  if (data.demographic.income?.length) {
-    const usIncome = data.demographic.income.find(d => d.label.includes('United States'));
-    if (usIncome) {
-      sections.push(`Median Household Income: $${parseInt(usIncome.value).toLocaleString()}`);
-    }
-  }
-
-  // Energy data (EIA)
-  if (data.energy?.eia && data.energy.eia.length > 0) {
-    data.energy.eia.slice(0, 3).forEach((series) => {
-      if (series.data && series.data.length > 0) {
-        const latest = series.data[0];
-        if (latest.value !== null) {
-          sections.push(`${series.name}: ${latest.value.toLocaleString()}${series.units ? ` ${series.units}` : ''} (${latest.period})`);
-        }
-      }
-    });
-  }
-
-  // Legislative data
-  if (data.legislative.relatedBills?.length) {
-    sections.push(`Related Bills in Congress: ${data.legislative.relatedBills.length} found`);
-    data.legislative.relatedBills.slice(0, 3).forEach(bill => {
-      sections.push(`  - ${bill.title}`);
-    });
-  }
-
-  return sections.length > 0 ? sections.join('\n') : 'No government data available for this topic.';
-}
+import { StanceAnalysisResult } from './stance-analysis';
 
 export function buildContrarianSystemPrompt(
   opposingLens: PoliticalLens,
   topic: string
 ): string {
-  const lensDescriptions: Record<PoliticalLens, string> = {
-    liberalism: 'Liberalism emphasizes individual rights, democracy, free markets with appropriate regulation, social justice, and the role of government in protecting civil liberties and ensuring equal opportunity.',
-    conservatism: 'Conservatism emphasizes tradition, limited government, free markets, individual responsibility, and the preservation of established institutions.',
-    socialism: 'Socialism emphasizes collective ownership, social equality, public services, workers\' rights, and reducing economic inequality through government intervention and social programs.',
-    libertarianism: 'Libertarianism emphasizes individual liberty, minimal government intervention, free markets, property rights, and voluntary association.',
-  };
-
-  return `You are a quantitative political contrarian. Your role is to challenge users' political stances using accurate statistics and government data. You are:
+  return `You are a quantitative political contrarian. Your PRIMARY GOAL is to help users strengthen their political stances through rigorous, data-driven challenge. You are:
 - Respectful but firm
 - Data-driven, not opinion-based
-- Focused on quantitative evidence
 - Educational, not combative
-- Goal: Help users strengthen their views through rigorous challenge
+- Goal: Help users strengthen their views through rigorous challenge (NOT to win arguments or play devil's advocate)
 
 You are challenging from a ${opposingLens} perspective on the topic: "${topic}"
 
-${lensDescriptions[opposingLens]}
+${LENS_DESCRIPTIONS[opposingLens]}
 
-IMPORTANT GUIDELINES:
-- Challenge the user's stance using quantitative evidence and statistics
-- Always cite sources using [n] notation
-- Acknowledge the user's position respectfully before challenging
-- Present counter-evidence with specific numbers and data
-- Ask probing follow-up questions that require deeper thought
+CRITICAL - USE ONLY THE PROVIDED GOVERNMENT DATA:
+- Every statistic you cite MUST come ONLY from the GOVERNMENT DATA section in the user message. Do not cite external studies, think tanks (e.g. NBER, Heritage, CIS), other countries' data, academic papers, or any source not listed in that section.
+- When data is limited: At most ONE brief sentence (e.g. "We have limited data on this topic."). Then focus analysis EXCLUSIVELY on the statistics we DO have. Do not dwell on gaps or repeat that data is missing. Do not invent or cite numbers from outside the provided data.
+- Do not state well-known facts (e.g. "the Second Amendment is in the Constitution") unless they appear in the GOVERNMENT DATA. Do not make interpretive leaps (e.g. "the presence of 20 bills highlights..."); stick to what the data literally says (e.g. "there are 20 related bills").
+- Your "sources" array must list ONLY sources that appear in or are implied by the GOVERNMENT DATA (e.g. BLS, Census, Congress.gov). No other sources.
+
+TOPIC-SPECIFIC STATISTICS ONLY (no generic or tangential stats):
+- FORBIDDEN as supporting/challenging statistics: (1) Generic bill counts (e.g. "20 related bills in Congress") unless the topic is specifically about legislative volume or process. (2) Broad economic indicators (e.g. unemployment rate, GDP) when the topic is NOT primarily about jobs, economy, or labor—do not use them as stand-ins for "socio-economic environment" or "family planning." (3) Any stat that is only loosely or tangentially related to the topic or the user's stance.
+- REQUIRED: Each statistic must be directly and specifically about the topic (e.g. for abortion: legislation titles, reproductive-health spending, relevant demographic or policy data from the provided block). If the GOVERNMENT DATA has no directly relevant statistic for one side, say so briefly and omit that slot rather than using a generic or tangential stat.
+
+OTHER GUIDELINES:
+- You will receive stance analysis results that acknowledge the user's position; use that acknowledgment, then present balanced challenge
+- Provide exactly 1 statistic FOR the user's stance and 1 AGAINST, both drawn only from the GOVERNMENT DATA and both directly relevant to the topic (see rules above)
+- If there is CONVERSATION HISTORY below: do NOT repeat the same statistics or data points you (the AI) already cited in a previous response. Choose different numbers, bills, or angles from the GOVERNMENT DATA, or explicitly acknowledge you are building on the same data and challenge from a different angle (e.g. implications, tradeoffs, or another slice of the data).
+- Keep total response concise (acknowledgment: 1-2 sentences, analysis: 2-3 sentences)
+- Cite sources using [n] notation; each citation must refer to a source from the government data
+- Ask ONE probing follow-up question that helps user think deeper. The question must NOT be about lack of data or "we don't have statistics for X"—focus on the substance of the topic using what we know.
 - Never be dismissive or condescending
-- Focus on helping users strengthen their views through rigorous challenge
 
-OUTPUT FORMAT:
-Your response should include:
-1. A brief acknowledgment of the user's position
-2. Quantitative counter-evidence (statistics, data points) with [n] citations
-3. A probing follow-up question
-
-End with a Sources section listing all sources as markdown links: [Source Name](URL)`;
+You MUST return valid JSON matching the provided schema.`;
 }
 
 export function buildContrarianUserPrompt(
   topic: string,
   userStance: string,
   governmentData: GovernmentData,
+  conversationHistory: ContrarianMessage[],
+  stanceAnalysis?: StanceAnalysisResult,
+  stanceHistory?: string[]
+): string {
+  const govDataSummary = formatGovernmentData(governmentData);
+  const historyText = conversationHistory.length ? '\n\nCONVERSATION HISTORY:\n' + conversationHistory.slice(-5).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n') : '';
+  const stanceHistoryText = stanceHistory?.length ? `\n\nUSER'S PRIOR STANCES (for continuity):\n${stanceHistory.map((s, i) => `${i + 1}. ${s}`).join('\n')}` : '';
+  const stanceAnalysisText = stanceAnalysis ? `\n\nSTANCE ANALYSIS (acknowledge these points):\n- Valid points: ${stanceAnalysis.validPoints.join(', ')}\n- Supporting statistic: ${stanceAnalysis.supportingStatistics[0]?.text || 'None'}\nUse this to craft your acknowledgment.` : '';
+  return `Help strengthen this user's stance on "${topic}" through data-driven challenge:
+
+USER'S STANCE:
+${userStance}${stanceHistoryText}
+
+GOVERNMENT DATA (use ONLY this for statistics—do not cite any other source):
+${govDataSummary}${historyText}${stanceAnalysisText}
+
+IMPORTANT:
+- Acknowledge the user's stance merits first (use stance analysis above)
+- Then provide balanced challenge with exactly 1 statistic FOR and 1 statistic AGAINST the user's stance. Both MUST be from the GOVERNMENT DATA and directly relevant to "${topic}" and the user's stance—no generic bill counts (e.g. "X bills in Congress") or broad economic stats (e.g. unemployment) unless the topic is explicitly about legislation volume or the economy. If the data has no directly relevant stat for one side, omit it or say so briefly; do not use tangential stats.
+- If CONVERSATION HISTORY is present above: do not repeat the same statistics you already used in a prior AI response. Prefer a different, topic-specific data point (specific bill title, topic-relevant spending, etc.).
+- Focus exclusively on statistics we have. Do not dwell on what's missing. If data is sparse, one brief notice max, then use only what we have. Do not infer meanings (e.g. "20 bills suggests..."); describe what the data says only when it is directly about the topic.
+- Your sources array must only include sources from the GOVERNMENT DATA.
+- Return valid JSON matching the schema`;
+}
+
+/**
+ * Builds prompt for when user asks a question instead of stating a stance
+ */
+export function buildQuestionResponsePrompt(
+  topic: string,
+  question: string,
+  governmentData: GovernmentData,
   conversationHistory: ContrarianMessage[]
 ): string {
   const govDataSummary = formatGovernmentData(governmentData);
-  
-  let historyText = '';
-  if (conversationHistory.length > 0) {
-    historyText = '\n\nCONVERSATION HISTORY:\n';
-    conversationHistory.slice(-5).forEach((msg) => {
-      historyText += `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}\n`;
-    });
-  }
+  const historyText = conversationHistory.length ? '\n\nCONVERSATION HISTORY:\n' + conversationHistory.slice(-5).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n') : '';
+  return `The user asked a question about "${topic}" instead of stating their stance. Help them think through their position:
 
-  return `Challenge this user's stance on "${topic}":
+USER'S QUESTION:
+${question}
 
-USER'S STANCE:
-${userStance}
-
-GOVERNMENT DATA:
+GOVERNMENT DATA (use ONLY this for statistics and facts—do not cite any other source):
 ${govDataSummary}${historyText}
 
-Please provide a quantitative challenge to the user's stance. Use statistics and data from the government data provided. Cite sources with [n] notation. End with a Sources section formatted as markdown links: [Source Name](URL).`;
+RESPONSE STRATEGY:
+- Use ONLY the GOVERNMENT DATA above for any statistics or numbers. Do not cite external studies, think tanks, other countries' data, or sources not listed there. If the data doesn't contain an answer to part of the question, say so or use the closest available data.
+- If the question is factual: Answer directly with data from the block above, then ask a question to help them think through their stance
+- If opinion-seeking: Guide with clarifying questions; if you mention any numbers, they must come from the GOVERNMENT DATA
+- Keep response under 150 words; use bullet points for statistics
+- Format citations as [n](url); sources must be from the GOVERNMENT DATA only
+
+Help the user move toward stating their stance on "${topic}" while being helpful and educational.`;
 }

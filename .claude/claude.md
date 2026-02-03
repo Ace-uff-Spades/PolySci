@@ -109,3 +109,4 @@ For complete methodology, see the systematic-debugging skill
 - Document architectural decisions and their outcomes for future reference
 - Track patterns in user feedback to improve collaboration over time
 - When you notice something that should be fixed but is unrelated to your current task, document it in docs rather than fixing it immediately
+- All docs should be neatly organized within the following structure: 

@@ -21,20 +21,33 @@ export interface ContrarianContext {
   conversationHistory: ContrarianMessage[];
   alignmentScores: AlignmentScores;
   governmentData: GovernmentData;
+  /** Prior stances the user has stated (for continuity) */
+  stanceHistory?: string[];
 }
 
-export interface ContrarianChallengeResponse {
-  challenge: string;
+export interface ContrarianOutput {
+  type: 'challenge' | 'question-response' | 'educational';
+  sections: {
+    // Challenge response fields
+    acknowledgment?: string;
+    keyStatisticsFor?: Array<{ text: string; citation?: number }>;
+    keyStatisticsAgainst?: Array<{ text: string; citation?: number }>;
+    deeperAnalysis?: string;
+    // Educational response fields (analysis + question only)
+    analysis?: string;
+    // Common field
+    followUpQuestion: string;
+  };
   updatedScores: AlignmentScores;
-  followUpQuestion: string;
-  sources?: Array<{ number: number; name: string; url: string }>;
+  sources: Array<{ number: number; name: string; url: string }>;
 }
 
-import { getOpenAIClient } from '../openai';
+import { getJSONCompletion } from '../openai';
 import { gatherGovernmentData } from '../government';
 import { buildContrarianSystemPrompt, buildContrarianUserPrompt } from './prompts';
 import { updateScores } from './scoring';
-import { extractSources } from '../analysis/sources';
+import { contrarianSchema } from './schemas';
+import { analyzeStance, StanceAnalysisResult } from './stance-analysis';
 
 /**
  * Determines which political lens the user's stance most aligns with
@@ -63,46 +76,44 @@ function determineOpposingLens(scores: AlignmentScores): PoliticalLens {
   return opposingMap[userLens];
 }
 
-export async function generateContrarianChallenge(
+export async function generateContrarian(
   context: ContrarianContext,
   userStance: string
-): Promise<ContrarianChallengeResponse> {
+): Promise<ContrarianOutput> {
+  // Stage 1: Analyze stance merits
+  const stanceAnalysis = await analyzeStance(
+    context.topic,
+    userStance,
+    context.governmentData
+  );
+
   // Determine opposing lens based on current alignment scores
   const opposingLens = determineOpposingLens(context.alignmentScores);
 
-  // Build prompts
+  // Stage 2: Generate challenge with dual statistics
   const systemPrompt = buildContrarianSystemPrompt(opposingLens, context.topic);
   const userPrompt = buildContrarianUserPrompt(
     context.topic,
     userStance,
     context.governmentData,
-    context.conversationHistory
+    context.conversationHistory,
+    stanceAnalysis,
+    context.stanceHistory
   );
 
-  // Call OpenAI
-  const client = getOpenAIClient();
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    temperature: 0.7,
-  });
-
-  const challengeText = response.choices[0]?.message?.content || '';
-
-  // Extract sources
-  const sources = extractSources(challengeText);
-
-  // Remove Sources section from challenge text
-  const challengeWithoutSources = challengeText.replace(/##\s+Sources\s*\n[\s\S]*$/i, '').trim();
-
-  // Extract follow-up question (last sentence or question mark)
-  const sentences = challengeWithoutSources.split(/[.!?]+/).filter(s => s.trim());
-  const followUpQuestion = sentences.length > 0 
-    ? sentences[sentences.length - 1].trim() + '?'
-    : 'What are your thoughts on this?';
+  // Use JSON mode for structured output
+  const challenge = await getJSONCompletion<{
+    acknowledgment: string;
+    statisticsFor: Array<{ text: string; citation?: number }>;
+    statisticsAgainst: Array<{ text: string; citation?: number }>;
+    deeperAnalysis: string;
+    followUpQuestion: string;
+    sources: Array<{ number: number; name: string; url: string }>;
+  }>(
+    systemPrompt,
+    userPrompt,
+    contrarianSchema
+  );
 
   // Update scores
   const updatedScores = await updateScores(
@@ -112,9 +123,15 @@ export async function generateContrarianChallenge(
   );
 
   return {
-    challenge: challengeWithoutSources,
+    type: 'challenge',
+    sections: {
+      acknowledgment: challenge.acknowledgment,
+      keyStatisticsFor: challenge.statisticsFor,
+      keyStatisticsAgainst: challenge.statisticsAgainst,
+      deeperAnalysis: challenge.deeperAnalysis,
+      followUpQuestion: challenge.followUpQuestion,
+    },
     updatedScores,
-    followUpQuestion,
-    sources,
+    sources: challenge.sources,
   };
 }

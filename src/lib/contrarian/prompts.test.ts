@@ -15,7 +15,7 @@ describe('contrarian prompts', () => {
       expect(prompt.toLowerCase()).toContain('quantitative political contrarian');
       expect(prompt.toLowerCase()).toContain('respectful but firm');
       expect(prompt.toLowerCase()).toContain('data-driven');
-      expect(prompt.toLowerCase()).toContain('statistics');
+      expect(prompt.toLowerCase()).toContain('statistic');
     });
 
     it('should build system prompt for conservatism opposing lens', () => {

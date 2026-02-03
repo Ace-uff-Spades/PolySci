@@ -9,23 +9,23 @@ interface AlignmentScoreBoxProps {
 const lensConfig = {
   liberalism: {
     label: 'Liberal',
-    color: 'bg-blue-500',
-    textColor: 'text-blue-700',
+    color: 'bg-[#475569]',
+    textColor: 'text-[#475569]',
   },
   conservatism: {
     label: 'Conservative',
-    color: 'bg-red-500',
-    textColor: 'text-red-700',
+    color: 'bg-[#6B8E6F]',
+    textColor: 'text-[#6B8E6F]',
   },
   socialism: {
     label: 'Socialist',
-    color: 'bg-yellow-500',
-    textColor: 'text-yellow-700',
+    color: 'bg-[#F59E0B]',
+    textColor: 'text-[#D97706]',
   },
   libertarianism: {
     label: 'Libertarian',
-    color: 'bg-purple-500',
-    textColor: 'text-purple-700',
+    color: 'bg-[#78716C]',
+    textColor: 'text-[#78716C]',
   },
 };
 
@@ -41,12 +41,12 @@ export function AlignmentScoreBox({ scores }: AlignmentScoreBoxProps) {
           <span className={`text-sm font-medium ${config.textColor}`}>
             {config.label}
           </span>
-          <span className="text-sm font-semibold text-gray-700">{score}/10</span>
+          <span className="text-sm font-semibold text-[#1C1917]">{score}/10</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div className="w-full bg-[#E7E5E4] rounded-full h-2 overflow-hidden">
           <div
-            className={`h-full ${config.color} transition-all duration-500 ease-out`}
-            style={{ width: `${percentage}%` }}
+            className={`h-full ${config.color} transition-all duration-[400ms] ease-out`}
+            style={{ width: `${percentage}%`, willChange: 'width' }}
             title={`Your responses align ${score}/10 with ${config.label}`}
           />
         </div>
@@ -55,8 +55,10 @@ export function AlignmentScoreBox({ scores }: AlignmentScoreBoxProps) {
   };
 
   return (
-    <div className="bg-white border rounded-lg p-4 shadow-sm">
-      <h4 className="text-sm font-semibold text-gray-800 mb-3">Alignment Scores</h4>
+    <div className="bg-white border border-[#D6D3D1] rounded-lg p-4 shadow-sm">
+      <h4 className="text-sm font-semibold text-[#1C1917] mb-3" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+        Alignment Scores
+      </h4>
       {renderMeter('liberalism')}
       {renderMeter('conservatism')}
       {renderMeter('socialism')}
