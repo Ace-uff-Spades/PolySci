@@ -1,67 +1,67 @@
-# PolySci
+# PolySci 📰
 
-A web application that helps users understand political news through balanced analysis, multiple perspectives, and quantitative government data.
+A web app that helps you understand political news through **balanced analysis**, **multiple perspectives**, and **quantitative government data** — no echo chambers, no single lens.
 
-## Purpose
+## Purpose 🎯
 
-PolySci was created to combat misinformation and echo chambers in political discourse. Instead of presenting news through a single ideological lens, it:
+PolySci was built to combat misinformation and echo chambers in political discourse. Instead of one ideological lens, you get:
 
-- Provides balanced analysis using real government data (BLS, Census, Congress.gov, etc.)
-- Shows multiple political perspectives on the same issue
-- Cites primary sources so users can verify claims themselves
-- Challenges users to examine their own political assumptions
+- 📊 **Balanced analysis** using real government data (BLS, Census, Congress.gov, etc.)
+- 👀 **Multiple perspectives** on the same issue — see how different ideologies interpret the same facts
+- 🔗 **Primary sources** so you can verify every claim yourself
+- 🤔 **Your assumptions challenged** (respectfully) so you can strengthen or refine your views
 
-The goal is **educational discourse** - helping users become more informed citizens, not winning arguments.
+The goal is **educational discourse** — helping you become a more informed citizen, not winning arguments.
 
-## Features
+## Features ✨
 
-### Analysis Tab
-Enter any political topic or news event and receive a comprehensive analysis including:
-- Quick summary of the event
-- Why it matters now
-- Key parties involved
-- Democratic and Republican perspectives
-- Impact on everyday citizens
-- Relevant statistics from government sources
-- Follow-up question suggestions
+### 📰 Analysis Tab
+Enter any political topic or news event and get a comprehensive breakdown:
+- 📝 Quick summary of the event
+- ⏰ Why it matters now
+- 👥 Key parties involved
+- 🏛️ Democratic and Republican perspectives
+- 🏠 Impact on everyday citizens
+- 📈 Relevant statistics from government sources
+- 💬 Follow-up question suggestions
 
-### Socratic Circle Tab
-Select from predefined political topics and see how four different ideological lenses interpret the same issue:
-- **Liberalism** - Individual rights, social justice, regulated markets
-- **Conservatism** - Tradition, limited government, free markets
-- **Socialism** - Collective ownership, workers' rights, equality
-- **Libertarianism** - Individual liberty, minimal government
+### 🏛️ Socratic Circle Tab
+Pick a topic and see how **four ideological lenses** interpret the same issue:
+- **Liberalism** — Individual rights, social justice, regulated markets
+- **Conservatism** — Tradition, limited government, free markets
+- **Socialism** — Collective ownership, workers' rights, equality
+- **Libertarianism** — Individual liberty, minimal government
 
-Each perspective is backed by the same government data, showing how ideology shapes interpretation.
+Same data, four lenses. Ideology shapes interpretation — see it side by side.
 
-### The Contrarian Tab
-Test and strengthen your political views with data-driven challenge:
-1. **Select a topic** (15 topics) — you get an initial question and neutral alignment scores (4 lenses: liberalism, conservatism, socialism, libertarianism).
-2. **Educational path:** Say "I don't know," ask a question, or share thoughts — you get analysis (common stances, values at stake) and a follow-up question. No statistics until you commit a stance.
-3. **Stance path:** Type your stance, then click **"I have a stance — challenge me"** (or confirm when asked "Is X your stance?"). The Contrarian runs a two-stage pipeline: acknowledge your stance merits, then challenge with one statistic for and one against (topic-specific, from government data only).
+### 🤔 The Contrarian Tab
+**Test and strengthen your views** with data-driven challenge (your views, not your ego):
+1. **Select a topic** (15 topics) — you get an opening question and neutral alignment scores (4 lenses: liberalism, conservatism, socialism, libertarianism).
+2. **📚 Educational path:** Say "I don't know," ask a question, or share thoughts — you get analysis (common stances, values at stake) and a follow-up question. No stats until you commit a stance.
+3. **⚔️ Stance path:** Type your stance, then click **"I have a stance — challenge me"** (or confirm when asked "Is X your stance?"). The Contrarian runs a two-stage pipeline: acknowledge your stance merits, then challenge with one stat for and one against (topic-specific, from government data only).
 4. **In contrarian mode:** Replies stay contrarian until you click **"I'm Done"** or ask a question (then one educational answer). Use **"Change my stance"** to submit a new stance and get a fresh challenge.
-5. **Alignment scores** update in real time (1–10 per lens); sources are cited with clickable links. CTAs ("Learn more," "Take action") appear on challenge responses when sources exist.
+5. **📊 Alignment scores** update in real time (1–10 per lens); sources are clickable. CTAs ("Learn more," "Take action") appear on challenge responses when sources exist.
 
-## Current Status
+## Current Status 📍
 
-### Completed
-- Full-stack Next.js 14 app with TypeScript and Tailwind CSS
-- Integration with 6 government data APIs (BLS, USASpending, Census, Congress.gov, EIA, FRED) and topic-aware data mapping
-- News integration via Newsdata.io with Firebase caching (24h news, 6h gov data TTL)
-- GPT-4o for analysis, Socratic perspectives, and Contrarian; gpt-4o-mini for classification (stance, question type, topic relevance)
-- All three feature tabs: Analysis (news + gov data → structured analysis), Socratic Circle (4 perspectives in parallel), The Contrarian (educational/contrarian modes, two-stage pipeline, JSON output)
-- Alignment scoring (4 lenses, 60/40 weighting), hybrid topic validation, explicit stance flow and "Change my stance"
-- Unit tests (Vitest, TDD) and AI evals (Braintrust + custom LLM scorers: faithfulness, relevancy, alignment)
+### ✅ Completed
+- 🛠️ Full-stack Next.js 14 app with TypeScript and Tailwind CSS
+- 📡 6 government data APIs (BLS, USASpending, Census, Congress.gov, EIA, FRED) + topic-aware mapping
+- 📰 News via Newsdata.io + Firebase caching (24h news, 6h gov data TTL)
+- 🤖 GPT-4o for analysis, Socratic, and Contrarian; gpt-4o-mini for classification (stance, question type, topic relevance)
+- 🎛️ All three tabs: Analysis, Socratic Circle (4 perspectives in parallel), The Contrarian (educational/contrarian modes, two-stage pipeline)
+- 📊 Alignment scoring (4 lenses, 60/40 weighting), hybrid topic validation, explicit stance flow + "Change my stance"
+- 🧪 Unit tests (Vitest, TDD) + AI evals (Braintrust + custom LLM scorers: faithfulness, relevancy, alignment)
 
-### Future Enhancements
-- User authentication (save conversation history, preferences)
-- URL parsing (paste article links instead of typing summaries)
-- Personalized "why you should care" based on user location/situation
-- Deep-dive capability on any output section
-- Related news suggestions based on conversation topics
-- Mobile-responsive design improvements
+### 🚀 Future Enhancements
+- 🔐 User authentication (save history, preferences)
+- 🔗 URL parsing (paste article links instead of typing summaries)
+- 📍 Personalized "why you should care" (location, situation)
+- 🔍 Deep-dive on any output section
+- 📰 Related news based on conversation
+- 📱 Mobile-responsive improvements
 
-## Architecture
+## Architecture 🏗️
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -94,53 +94,56 @@ Test and strengthen your political views with data-driven challenge:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Tech Stack
-- **Frontend**: Next.js 14, React, Tailwind CSS
-- **Backend**: Next.js API Routes
-- **Cache**: Firebase Firestore (news 24h, gov data 6h TTL)
-- **LLM**: OpenAI GPT-4o (analysis, Socratic, Contrarian, evals); gpt-4o-mini (classification)
-- **Testing**: Vitest (unit), Braintrust + custom LLM scorers (AI evals)
+### 🛠️ Tech Stack
+| Layer | Stack |
+|-------|--------|
+| **Frontend** | Next.js 14, React, Tailwind CSS |
+| **Backend** | Next.js API Routes |
+| **Cache** | Firebase Firestore (news 24h, gov data 6h TTL) |
+| **LLM** | GPT-4o (analysis, Socratic, Contrarian, evals) · gpt-4o-mini (classification) |
+| **Testing** | Vitest (unit) · Braintrust + custom LLM scorers (AI evals) |
 
-### Data Sources
-| Source | Data Provided |
-|--------|---------------|
-| Newsdata.io | News articles |
-| Bureau of Labor Statistics | Unemployment, inflation, wages |
-| USASpending.gov | Federal budget, spending |
-| Census Bureau | Demographics, income |
-| Congress.gov | Bills, legislation |
-| EIA (optional) | Energy data |
-| FRED (optional) | Economic indicators |
+### 📊 Data Sources
+| Source | What you get |
+|--------|----------------|
+| Newsdata.io | 📰 News articles |
+| Bureau of Labor Statistics | 📈 Unemployment, inflation, wages |
+| USASpending.gov | 💵 Federal budget, spending |
+| Census Bureau | 👥 Demographics, income |
+| Congress.gov | 📜 Bills, legislation |
+| EIA (optional) | ⚡ Energy data |
+| FRED (optional) | 📉 Economic indicators |
 
-## Getting Started
+## Getting Started 🚀
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Set up environment variables
+# 2. Set up env (OPENAI_API_KEY required; Newsdata.io, Firebase, gov API keys as needed)
 cp .env.example .env.local
-# Edit .env.local: OPENAI_API_KEY required; Newsdata.io, Firebase, gov API keys as needed
 
-# Run development server
+# 3. Run the app
 npm run dev
 
-# Run unit tests
+# 4. Run unit tests
 npm test
 
-# Run AI evals (requires OPENAI_API_KEY; optional EVAL_LIMIT=N, dataset: all | contrarian | educational)
+# 5. Run AI evals (optional: EVAL_LIMIT=N, dataset: educational | contrarian | all)
 npm run eval
 npm run eval -- educational
 npm run eval -- contrarian
 ```
 
-## Docs
+## Docs 📖
 
-- **Architecture & flows:** `docs/architecture.md`
-- **Case study (purpose, UX, tradeoffs, evals):** `docs/case-study-summary.md`
-- **Project status & open work:** `docs/project_state.md`
-- **Context management (for contributors):** `docs/context-management.md`
+| Doc | What's inside |
+|-----|----------------|
+| **Architecture & flows** | `docs/architecture.md` |
+| **Case study** (purpose, UX, tradeoffs, evals) | `docs/case-study-summary.md` |
+| **Project status & open work** | `docs/project_state.md` |
+| **Context management** (for contributors) | `docs/context-management.md` |
 
-## License
+## License 📄
 
 MIT
